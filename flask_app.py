@@ -35,7 +35,7 @@ def presentation():
         <li>Les jeux vidéo</li>
         <li>La musique</li>
         <li>Le sport (bientôt !)</li>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" width="100">
+        <img src="https://www.europosters.fr/view-to-jerusalem-old-city-israel-f73191393" width="100">
     </ul>
     """
 
