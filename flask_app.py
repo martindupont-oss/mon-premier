@@ -3,6 +3,7 @@ import os
 import urllib.parse
 import urllib.request
 import uuid
+from datetime import datetime
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__)
@@ -15,6 +16,16 @@ ADMIN_EMAILS = [
 ]
 
 
+# --- GESTION GLOBALE DU CORS (Extension & Frontend) ---
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, DELETE"
+    return response
+
+
+# --- FONCTIONS UTILITAIRES DE LECTURE / ÉCRITURE JSON ---
 def get_all_data():
     if not os.path.exists(DATA_FILE):
         return {}
@@ -56,6 +67,39 @@ def save_custom_evals(evals):
         json.dump(evals, f, ensure_ascii=False, indent=2)
 
 
+def update_student_stats(student):
+    """Calcule automatiquement la moyenne, le nombre de RA acquis et la trajectoire 70%."""
+    scores = student.get("scores", {})
+    clean_scores = {}
+
+    for code, score in scores.items():
+        try:
+            clean_code = str(code).strip().upper()
+            clean_scores[clean_code] = float(score)
+        except (ValueError, TypeError):
+            continue
+
+    student["scores"] = clean_scores
+    total_ra = len(clean_scores)
+
+    if total_ra > 0:
+        sum_scores = sum(clean_scores.values())
+        acquired_70 = sum(1 for val in clean_scores.values() if val >= 70)
+
+        student["globalProgress"] = round(sum_scores / total_ra, 1)
+        student["acquiredCount"] = acquired_70
+        student["totalRA"] = total_ra
+        student["trajectoirePercent"] = round((acquired_70 / total_ra) * 100, 1)
+    else:
+        student["globalProgress"] = 0
+        student["acquiredCount"] = 0
+        student["totalRA"] = 0
+        student["trajectoirePercent"] = 0
+
+    return student
+
+
+# --- ROUTES PRINCIPALES ---
 @app.route("/")
 @app.route("/index.html")
 def home():
@@ -79,28 +123,30 @@ def save_student():
             old_data["scores"].update(payload["scores"])
             payload["scores"] = old_data["scores"]
 
-    db[email] = payload
+    student = update_student_stats(payload)
+    db[email] = student
     save_all_data(db)
-    return jsonify({"status": "success", "message": "Sauvegardé avec succès"})
+
+    return jsonify(
+        {
+            "status": "success",
+            "message": "Sauvegardé avec succès",
+            "student": student,
+        }
+    )
 
 
 @app.route("/api/sync-pitch", methods=["POST", "OPTIONS"])
 def sync_pitch():
     if request.method == "OPTIONS":
-        res = jsonify({"status": "ok"})
-        res.headers["Access-Control-Allow-Origin"] = "*"
-        res.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        res.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-        return res
+        return jsonify({"status": "ok"})
 
     payload = request.get_json() or {}
     email = payload.get("email", "").strip().lower()
     scores = payload.get("scores", {})
 
     if not email:
-        res = jsonify({"status": "error", "message": "Email non détecté"})
-        res.headers["Access-Control-Allow-Origin"] = "*"
-        return res, 400
+        return jsonify({"status": "error", "message": "Email non détecté"}), 400
 
     db = get_all_data()
     student = db.get(
@@ -109,23 +155,34 @@ def sync_pitch():
             "name": email.split("@")[0].replace(".", " ").title(),
             "email": email,
             "promo": "Bachelor International",
+            "scores": {},
         },
     )
 
-    if "scores" not in student:
+    if "scores" not in student or not isinstance(student["scores"], dict):
         student["scores"] = {}
 
+    # Fusion des compétences reçues de l'extension
     student["scores"].update(scores)
-    student["updatedAt"] = payload.get("updatedAt", "")
+    student["updatedAt"] = payload.get(
+        "updatedAt", datetime.utcnow().isoformat()
+    )
+
+    # Recalcul des métriques globales
+    student = update_student_stats(student)
+
     db[email] = student
     save_all_data(db)
 
-    res = jsonify({
-        "status": "success",
-        "message": f"Synchronisation réussie pour {email} ! {len(scores)} compétences importées.",
-    })
-    res.headers["Access-Control-Allow-Origin"] = "*"
-    return res
+    return jsonify(
+        {
+            "status": "success",
+            "message": f"Synchronisation réussie pour {email} ! {len(scores)} compétences importées.",
+            "totalRA": student["totalRA"],
+            "globalProgress": student["globalProgress"],
+            "trajectoirePercent": student["trajectoirePercent"],
+        }
+    )
 
 
 @app.route("/api/students", methods=["GET"])
@@ -141,10 +198,12 @@ def delete_student():
 
     if admin_email not in ADMIN_EMAILS:
         return (
-            jsonify({
-                "status": "error",
-                "message": "Accès refusé : vous n'êtes pas administrateur.",
-            }),
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "Accès refusé : vous n'êtes pas administrateur.",
+                }
+            ),
             403,
         )
 
@@ -152,13 +211,16 @@ def delete_student():
     if target_email in db:
         del db[target_email]
         save_all_data(db)
-        return jsonify({
-            "status": "success",
-            "message": f"Compte {target_email} supprimé.",
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": f"Compte {target_email} supprimé.",
+            }
+        )
     return jsonify({"status": "error", "message": "Élève introuvable."}), 404
 
 
+# --- GESTION DES ÉVALUATIONS ---
 @app.route("/api/evaluations", methods=["GET"])
 def get_evaluations():
     return jsonify(get_custom_evals())
@@ -173,7 +235,10 @@ def propose_evaluation():
     student_email = payload.get("studentEmail", "").strip().lower()
 
     if not title or not date_str or not student_email:
-        return jsonify({"status": "error", "message": "Informations manquantes"}), 400
+        return (
+            jsonify({"status": "error", "message": "Informations manquantes"}),
+            400,
+        )
 
     evals = get_custom_evals()
     new_eval = {
@@ -187,11 +252,13 @@ def propose_evaluation():
     evals.append(new_eval)
     save_custom_evals(evals)
 
-    return jsonify({
-        "status": "success",
-        "message": "Proposition transmise aux administrateurs.",
-        "eval": new_eval,
-    })
+    return jsonify(
+        {
+            "status": "success",
+            "message": "Proposition transmise aux administrateurs.",
+            "eval": new_eval,
+        }
+    )
 
 
 @app.route("/api/admin/approve-evaluation", methods=["POST"])
@@ -214,10 +281,12 @@ def approve_evaluation():
 
     if found:
         save_custom_evals(evals)
-        return jsonify({
-            "status": "success",
-            "message": "Évaluation validée et officialisée.",
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "message": "Évaluation validée et officialisée.",
+            }
+        )
     return jsonify({"status": "error", "message": "Évaluation introuvable."}), 404
 
 
@@ -237,6 +306,7 @@ def delete_evaluation():
     return jsonify({"status": "success", "message": "Évaluation supprimée"})
 
 
+# --- ROUTE PROXY DE MANGEMENT EMPLOI DU TEMPS (iCal) ---
 @app.route("/api/fetch-ical", methods=["POST"])
 def fetch_ical():
     data = request.get_json() or {}
@@ -254,13 +324,15 @@ def fetch_ical():
         parsed_url = urllib.parse.urlsplit(url)
         encoded_path = urllib.parse.quote(parsed_url.path)
         encoded_query = urllib.parse.quote(parsed_url.query, safe="=&?%")
-        clean_url = urllib.parse.urlunsplit((
-            parsed_url.scheme,
-            parsed_url.netloc,
-            encoded_path,
-            encoded_query,
-            parsed_url.fragment,
-        ))
+        clean_url = urllib.parse.urlunsplit(
+            (
+                parsed_url.scheme,
+                parsed_url.netloc,
+                encoded_path,
+                encoded_query,
+                parsed_url.fragment,
+            )
+        )
 
         req = urllib.request.Request(
             clean_url, headers={"User-Agent": "Mozilla/5.0"}
