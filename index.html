@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICAM - Suivi des Compétences C01-C13 & Pitch Tracker</title>
+    <title>ICAM - Suivi des Compétences & Planning Évaluations</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -29,30 +29,30 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Auth Modal / Overlay -->
+    <!-- Modal Authentification -->
     <div id="authModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full border border-slate-100">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 bg-red-100 text-icam-red rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
-                    <i class="fa-solid font-bold fa-graduation-cap"></i>
+                    <i class="fa-solid fa-graduation-cap"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">Portail ICAM</h2>
-                <p class="text-xs text-slate-500 mt-1">Connectez-vous avec votre adresse officielle ICAM</p>
+                <p class="text-xs text-slate-500 mt-1">Connecte-toi avec ton adresse email officielle ICAM</p>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nom Complet</label>
-                    <input type="text" id="userNameInput" required placeholder="ex : Martin Dupont" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red focus:border-icam-red text-sm outline-none">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nom complet</label>
+                    <input type="text" id="userNameInput" required placeholder="ex. Martin Dupont" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red text-sm outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Adresse Email ICAM</label>
-                    <input type="email" id="userEmailInput" required placeholder="nom.prenom@2026.icam.fr" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red focus:border-icam-red text-sm outline-none">
-                    <p id="emailError" class="text-red-500 text-xs mt-1 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Veuillez utiliser un email ICAM valide (ex : nom.prenom@2026.icam.fr)</p>
+                    <input type="email" id="userEmailInput" required placeholder="nom.prenom@2026.icam.fr" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red text-sm outline-none">
+                    <p id="emailError" class="text-red-500 text-xs mt-1 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Email ICAM non reconnu (ex. nom.prenom@2026.icam.fr)</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Promotion / Parcours</label>
-                    <select id="userPromoInput" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red focus:border-icam-red text-sm outline-none">
+                    <select id="userPromoInput" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red text-sm outline-none">
                         <option value="Bachelor International">Bachelor International</option>
                         <option value="Ingénieur Apprentissage">Ingénieur Apprentissage</option>
                         <option value="Ingénieur Généraliste">Ingénieur Généraliste</option>
@@ -65,44 +65,54 @@
         </div>
     </div>
 
-    <!-- Header Navigation -->
+    <!-- Barre de Navigation -->
     <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
                 <div class="bg-icam-red text-white px-3 py-1.5 rounded-lg font-black text-xl tracking-wider">ICAM</div>
                 <div>
-                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi des Compétences & Pitch</h1>
-                    <p class="text-xs text-slate-400">Référentiel C01 à C13 • Promotion 2026</p>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Planning</h1>
+                    <p class="text-xs text-slate-400">Référentiel C01-C13 • Synchro Hyperplanning</p>
                 </div>
             </div>
 
-            <!-- User Status & Actions -->
-            <div class="flex items-center space-x-4">
+            <!-- Navigation par Onglets -->
+            <nav class="flex items-center space-x-1 bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs">
+                <button onclick="switchTab('referentiel')" id="tabBtnReferentiel" class="px-3 py-1.5 rounded-lg font-medium transition bg-icam-red text-white">
+                    <i class="fa-solid fa-chart-radar mr-1.5"></i>Référentiel C01-C13
+                </button>
+                <button onclick="switchTab('planning')" id="tabBtnPlanning" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-calendar-days mr-1.5"></i>Planning & Examens
+                </button>
+                <button onclick="switchTab('classement')" id="tabBtnClassement" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white">
+                    <i class="fa-solid fa-users mr-1.5"></i>Classement Promo
+                </button>
+            </nav>
+
+            <!-- Profil utilisateur -->
+            <div class="flex items-center space-x-3">
                 <div id="userInfo" class="hidden text-right">
-                    <div class="text-sm font-semibold flex items-center gap-2">
-                        <span id="displayUserName" class="text-white"></span>
-                        <span class="bg-emerald-500/20 text-emerald-300 text-xs px-2 py-0.5 rounded-full border border-emerald-500/30"><i class="fa-solid fa-lock text-[10px] mr-1"></i>Lecture/Écriture</span>
-                    </div>
-                    <div id="displayUserEmail" class="text-xs text-slate-400"></div>
+                    <div id="displayUserName" class="text-xs font-bold text-white"></div>
+                    <div id="displayUserEmail" class="text-[10px] text-slate-400"></div>
                 </div>
-                <button onclick="logout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Déconnexion
+                <button onclick="logout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 transition">
+                    <i class="fa-solid fa-power-off"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Contenu Principal -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
-        <!-- Top Statistics Cards -->
+        <!-- Cartes de Statistiques -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
                 <div class="p-3 bg-red-100 text-icam-red rounded-lg text-xl">
                     <i class="fa-solid fa-chart-pie"></i>
                 </div>
                 <div>
-                    <div class="text-xs text-slate-500 font-medium">Progression Personnelle</div>
+                    <div class="text-xs text-slate-500 font-medium">Moyenne Personnelle</div>
                     <div class="text-2xl font-bold text-slate-800" id="userOverallScore">0%</div>
                 </div>
             </div>
@@ -112,18 +122,18 @@
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <div>
-                    <div class="text-xs text-slate-500 font-medium">Moyenne de la Classe</div>
+                    <div class="text-xs text-slate-500 font-medium">Moyenne Classe</div>
                     <div class="text-2xl font-bold text-slate-800" id="classAvgScore">58%</div>
                 </div>
             </div>
 
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
                 <div class="p-3 bg-amber-100 text-amber-600 rounded-lg text-xl">
-                    <i class="fa-solid fa-trophy"></i>
+                    <i class="fa-solid fa-calendar-check"></i>
                 </div>
                 <div>
-                    <div class="text-xs text-slate-500 font-medium">Meilleure Note Classe</div>
-                    <div class="text-2xl font-bold text-slate-800" id="topStudentScore">94%</div>
+                    <div class="text-xs text-slate-500 font-medium">Prochaine Échéance</div>
+                    <div class="text-sm font-bold text-slate-800" id="nextDeadlineText">Aucune définie</div>
                 </div>
             </div>
 
@@ -138,84 +148,66 @@
             </div>
         </div>
 
-        <!-- Main Dashboard Tabs / Selector -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
+        <!-- ONGLET 1 : RÉFÉRENTIEL C01 - C13 -->
+        <section id="secReferentiel" class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Référentiel de Compétences (C01 - C13)</h2>
-                    <p class="text-xs text-slate-500">Sélectionnez une compétence pour mettre à jour vos acquis, consulter le radar et programmer la validation.</p>
+                    <h2 class="text-xl font-bold text-slate-800">Référentiel de Compétences</h2>
+                    <p class="text-xs text-slate-500">Sélectionne une compétence pour mettre à jour tes scores et planifier sa validation.</p>
                 </div>
-
-                <div class="flex items-center gap-3">
+                <div>
                     <select id="competenceSelect" onchange="renderCompetenceDetails()" class="bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-icam-red outline-none">
-                        <!-- Filled by JS -->
+                        <!-- Rempli en JS -->
                     </select>
                 </div>
             </div>
 
-            <!-- Competence Viewer Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-                
-                <!-- Left Column: Radar & Class Comparison -->
+                <!-- Radar -->
                 <div class="lg:col-span-5 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col items-center justify-center">
                     <div class="w-full flex items-center justify-between mb-2">
                         <span class="text-xs font-bold text-slate-600 uppercase">Radar des Résultats (RA)</span>
-                        <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded">Temps réel</span>
                     </div>
-                    <div class="relative w-full aspect-square max-w-[340px]">
+                    <div class="relative w-full aspect-square max-w-[320px]">
                         <canvas id="competenceRadarChart"></canvas>
-                    </div>
-                    <div class="mt-4 text-xs text-slate-500 flex items-center space-x-4">
-                        <span class="flex items-center"><span class="w-3 h-3 bg-emerald-500 rounded-full inline-block mr-1"></span> Vous</span>
-                        <span class="flex items-center"><span class="w-3 h-3 bg-blue-400 rounded-full inline-block mr-1"></span> Moyenne Classe</span>
-                        <span class="flex items-center"><span class="w-3 h-3 bg-amber-400 rounded-full inline-block mr-1"></span> Top Classe</span>
                     </div>
                 </div>
 
-                <!-- Right Column: Sub-skills (RA) Breakdown & Validation Details -->
+                <!-- Détails & Validation -->
                 <div class="lg:col-span-7 space-y-6">
                     <div>
                         <h3 id="compTitle" class="text-lg font-bold text-slate-800">---</h3>
                         <p id="compDescription" class="text-xs text-slate-500 mt-1">---</p>
                     </div>
 
-                    <!-- List of Sub-skills / RA -->
+                    <!-- Sous-compétences RA -->
                     <div>
-                        <h4 class="text-xs font-bold text-slate-600 uppercase mb-3 flex items-center justify-between">
-                            <span>Résultats d'Apprentissage (RA) & Niveau</span>
-                            <span class="text-[10px] text-emerald-600 font-normal"><i class="fa-solid fa-user-lock mr-1"></i>Seul vous pouvez éditer vos scores</span>
-                        </h4>
-                        <div id="raListContainer" class="space-y-3">
-                            <!-- Filled dynamically -->
-                        </div>
+                        <h4 class="text-xs font-bold text-slate-600 uppercase mb-3">Résultats d'Apprentissage (RA)</h4>
+                        <div id="raListContainer" class="space-y-3"></div>
                     </div>
 
-                    <!-- Validation, Date & Referee Section -->
+                    <!-- Formulaire Validation -->
                     <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-4 space-y-4">
-                        <h4 class="text-xs font-bold text-amber-900 uppercase flex items-center">
-                            <i class="fa-solid fa-calendar-check mr-2 text-amber-600"></i> Planification & Validation officielle
-                        </h4>
-
+                        <h4 class="text-xs font-bold text-amber-900 uppercase"><i class="fa-solid fa-clock mr-2"></i>Planification de la validation</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Date limite de validation</label>
-                                <input type="date" id="valDate" onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 outline-none focus:ring-2 focus:ring-amber-500">
+                                <input type="date" id="valDate" onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Référent / Valideur</label>
-                                <select id="valReferee" onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 outline-none focus:ring-2 focus:ring-amber-500">
+                                <select id="valReferee" onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs">
                                     <option value="Tuteur ICAM">Tuteur ICAM</option>
                                     <option value="Enseignant Référent">Enseignant Référent Module</option>
-                                    <option value="Tuteur Entreprise">Tuteur Entreprise (Stage/Apprentissage)</option>
+                                    <option value="Tuteur Entreprise">Tuteur Entreprise</option>
                                     <option value="Jury de Soutenance">Jury de Soutenance Pitch</option>
                                 </select>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Statut d'avancement</label>
-                                <select id="valStatus" onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 font-medium outline-none focus:ring-2 focus:ring-amber-500">
+                                <select id="valStatus" onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs">
                                     <option value="Non commencé">🔴 Non commencé</option>
                                     <option value="En cours">🟡 En cours d'acquisition</option>
                                     <option value="Prêt pour évaluation">🔵 Prêt pour évaluation</option>
@@ -223,51 +215,59 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Lien de la preuve / Livrable (GitHub, PDF)</label>
-                                <input type="url" id="valProof" placeholder="https://github.com/..." onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 outline-none focus:ring-2 focus:ring-amber-500">
-                            </div>
-                        </div>
-
-                        <!-- Calendar Sync Buttons -->
-                        <div class="pt-2 flex flex-wrap gap-2 items-center justify-between border-t border-amber-200/60">
-                            <span class="text-[11px] text-amber-800 font-medium">Synchroniser l'échéance :</span>
-                            <div class="flex gap-2">
-                                <button onclick="addToGoogleCalendar()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition flex items-center">
-                                    <i class="fa-brands fa-google text-red-500 mr-1.5"></i> Google Calendar
-                                </button>
-                                <button onclick="downloadICS()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition flex items-center">
-                                    <i class="fa-solid fa-calendar-plus text-blue-600 mr-1.5"></i> Apple / Outlook (.ics)
-                                </button>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Lien du livrable (GitHub, PDF)</label>
+                                <input type="url" id="valProof" placeholder="https://github.com/..." onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs">
                             </div>
                         </div>
                     </div>
-
-                    <!-- Ideas & Tips for Validation -->
-                    <div class="bg-blue-50/60 border border-blue-200 rounded-xl p-4">
-                        <h4 class="text-xs font-bold text-blue-900 uppercase flex items-center mb-2">
-                            <i class="fa-regular fa-lightbulb mr-2 text-blue-600"></i> Conseils & Idées de preuves pour valider cette compétence
-                        </h4>
-                        <ul id="compTipsList" class="text-xs text-blue-800 space-y-1 list-disc list-inside">
-                            <!-- Filled dynamically -->
-                        </ul>
-                    </div>
-
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Class Leaderboard & Peer Comparison Section -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
-            <div class="flex items-center justify-between mb-4">
+        <!-- ONGLET 2 : PLANNING & SYNCHRO HYPERPLANNING / PRONOTE / ICS -->
+        <section id="secPlanning" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-calendar-days text-icam-red mr-2"></i>Planning & Synchronisation des Évaluations</h2>
+                <p class="text-xs text-slate-500 mt-1">Importe ton emploi du temps Hyperplanning, Pronote ou Apple Calendrier pour voir tes examens et caler tes validations de compétences.</p>
+            </div>
+
+            <!-- Boîte d'importation iCal / ICS -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-800">Tableau de Classe & Avancement Général</h3>
-                    <p class="text-xs text-slate-500">Aperçu anonymisé et partagé des moyennes de la promo ICAM.</p>
+                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-link mr-1.5 text-blue-600"></i>Lien d'abonnement iCal (Hyperplanning / Pronote)</h3>
+                    <div class="flex gap-2">
+                        <input type="url" id="icalUrlInput" placeholder="https://hyperplanning.icam.fr/ical/..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red">
+                        <button onclick="importIcalUrl()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-700">Synchroniser</button>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1">Dans Hyperplanning/Pronote ➔ Paramètres ➔ Importer/Exporter ➔ Copier le lien iCal.</p>
                 </div>
-                <button onclick="exportClassData()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition">
-                    <i class="fa-solid fa-download mr-1"></i> Exporter mes données JSON
-                </button>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-file-arrow-up mr-1.5 text-emerald-600"></i>Ou importer un fichier `.ics` (Apple / Outlook)</h3>
+                    <input type="file" id="icsFileInput" accept=".ics" onchange="importIcsFile(event)" class="text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer">
+                </div>
             </div>
 
+            <!-- Liste des Événements & Examens Détectés -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
+                    <span><i class="fa-solid fa-list-check mr-2 text-icam-red"></i>Évaluations & Devoirs à venir</span>
+                    <span id="eventCountBadge" class="bg-red-100 text-icam-red text-xs px-2 py-0.5 rounded-full font-bold">0 événement</span>
+                </h3>
+
+                <div id="calendarEventsContainer" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                    <div class="text-center py-8 text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                        <i class="fa-solid fa-calendar-xmark text-2xl mb-2 text-slate-300"></i>
+                        <p>Aucun événement importé pour le moment.</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Colle ton lien iCal ci-dessus ou choisis des dates de validation dans le référentiel.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 3 : CLASSEMENT PROMO -->
+        <section id="secClassement" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Avancement Général de la Promotion</h3>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
@@ -275,168 +275,53 @@
                             <th class="py-3 px-4">Élève</th>
                             <th class="py-3 px-4">Promotion</th>
                             <th class="py-3 px-4">Score Moyen C01-C13</th>
-                            <th class="py-3 px-4">Compétences Prêtes</th>
-                            <th class="py-3 px-4">Dernière Mise à Jour</th>
-                            <th class="py-3 px-4 text-right">Action</th>
+                            <th class="py-3 px-4">Compétences Validées</th>
                         </tr>
                     </thead>
-                    <tbody id="classTableBody" class="divide-y divide-slate-100">
-                        <!-- Filled dynamically -->
-                    </tbody>
+                    <tbody id="classTableBody" class="divide-y divide-slate-100"></tbody>
                 </table>
             </div>
-        </div>
+        </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-12 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-                <p class="font-semibold text-slate-300">ICAM Competence & Pitch Tracker</p>
-                <p class="text-[11px] text-slate-500">Plateforme hébergée sur GitHub Pages pour la promotion ICAM.</p>
-            </div>
-            <div class="flex items-center space-x-4 text-slate-400">
-                <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> Sécurité par utilisateur</span>
-                <span><i class="fa-solid fa-code-branch text-blue-400 mr-1"></i> Git Ready</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript Application Logic -->
+    <!-- JS Application -->
     <script>
-        // Database of C01 to C13 Competences with RAs
         const COMPETENCES_DB = {
-            "C01": {
-                title: "C01 : Acquérir et mémoriser des connaissances",
-                desc: "Acquérir, structurer et restituer les bases scientifiques et techniques.",
-                ras: ["RA-EEE-C01-1", "RA-ESE-C01-1", "RA-HUM-C01-1", "RA-HUM-C01-2", "RA-HUM-C01-3", "RA-ICT-C01-1", "RA-MIA-C01-1", "RA-MIA-C01-2", "RA-MIA-C01-3", "RA-MIA-C01-4", "RA-MME-C01-1", "RA-MME-C01-2"],
-                tips: [
-                    "Rédiger des fiches de synthèse théorique sur le dépôt GitHub.",
-                    "Obtenir une note supérieure à 14/20 aux évaluations théoriques sur les modules MIA et MME."
-                ]
-            },
-            "C02": {
-                title: "C02 : Organiser ses connaissances théoriques et expérimentales",
-                desc: "Relier la théorie à la pratique dans des projets d'ingénierie.",
-                ras: ["RA-EEE-C02-1", "RA-ESE-C02-1", "RA-ICT-C02-1", "RA-MME-C02-1", "RA-MME-C02-2", "RA-PROJET-C02-1", "RA-PROJET-C02-2"],
-                tips: [
-                    "Créer un compte-rendu de TP sur XAMPP / Flask avec mesures comparatives.",
-                    "Mettre en place des cas de test automatisés pour valider les lois scientifiques."
-                ]
-            },
-            "C03": {
-                title: "C03 : Rédiger un cahier des charges pour caractériser un problème",
-                desc: "Formaliser les besoins du client et traduire les exigences fonctionnelles.",
-                ras: ["RA-EEE-C02-1", "RA-ESE-C02-1", "RA-ICT-C02-1", "RA-MME-C02-1", "RA-MME-C02-2", "RA-PROJET-C02-1", "RA-PROJET-C02-2"],
-                tips: [
-                    "Publier le fichier `README.md` ou `SPECIFICATIONS.md` structuré sur GitHub.",
-                    "Faire valider la grille d'exigences par le tuteur entreprise ou prof référent."
-                ]
-            },
-            "C04": {
-                title: "C04 : Entreprendre un travail d'innovation dans une pensée de recherche",
-                desc: "Proposer des solutions originales basées sur une veille scientifique.",
-                ras: ["RA-EEE-C03-1", "RA-EEE-C03-2", "RA-EEE-C03-3", "RA-ESE-C03-1", "RA-ESE-C03-2", "RA-HUM-C03-1", "RA-HUM-C03-2", "RA-HUM-C03-3", "RA-MEO-C03-1", "RA-MEO-C03-2", "RA-MIA-C03-1", "RA-MME-C03-1", "RA-MME-C03-2", "RA-MME-C03-3", "RA-PROJET-C03-1", "RA-PROJET-C03-2", "RA-PROJET-C03-3"],
-                tips: [
-                    "Réaliser un état de l'art de 2 pages avec sources universitaires.",
-                    "Proposer un prototype fonctionnel innovant tournant sur Flask."
-                ]
-            },
-            "C05": {
-                title: "C05 : Mener une démarche scientifique en mode collaboratif",
-                desc: "Travailler efficacement en équipe scientifique ou technique.",
-                ras: ["RA-HUM-C05-1", "RA-HUM-C05-2", "RA-PROJET-C05-2"],
-                tips: [
-                    "Utiliser Git / GitHub avec des branches séparées et des Pull Requests relues entre pairs.",
-                    "Documenter la répartition des tâches et réunions d'équipe."
-                ]
-            },
-            "C06": {
-                title: "C06 : Rechercher et extraire des informations pertinentes",
-                desc: "Savoir analyser une documentation technique complexe.",
-                ras: ["RA-HUM-C06-1", "RA-HUM-C06-2", "RA-HUM-C06-3", "RA-HUM-C06-5", "RA-HUM-C06-7", "RA-HUM-C06-8", "RA-HUM-C06-9", "RA-HUM-C06-10", "RA-MEO-C06-1"],
-                tips: [
-                    "Synthétiser la documentation d'une API ou d'un composant technique.",
-                    "Fournir une bibliographie normalisée dans le dossier final."
-                ]
-            },
-            "C07": {
-                title: "C07 : Développer une posture de pilote d'activité industrielle",
-                desc: "Planifier, gérer les ressources et suivre l'avancement d'un projet.",
-                ras: ["RA-MEO-C07-1", "RA-MEO-C07-2", "RA-MEO-C07-3", "RA-PROJET-C07-1"],
-                tips: [
-                    "Fournir un diagramme de Gantt ou un tableau Kanban GitHub Projects actif.",
-                    "Présenter un suivi de budget / temps passé."
-                ]
-            },
-            "C08": {
-                title: "C08 : Manager les équipes dans le souci de la réussite collective",
-                desc: "Animer la dynamique de groupe, communiquer et gérer les conflits.",
-                ras: ["RA-HUM-C08-1", "RA-MEO-C08-1", "RA-MEO-C08-4", "RA-PROJET-C08-1"],
-                tips: [
-                    "Animer au moins 2 réunions d'équipe avec ordre du jour et compte-rendu.",
-                    "Solliciter le feedback de ses coéquipiers."
-                ]
-            },
-            "C09": {
-                title: "C09 : Intégrer les enjeux et les besoins de la planète et de l'humain",
-                desc: "Prendre en compte le développement durable, la RSE et l'éthique.",
-                ras: ["RA-HUM-C08-1", "RA-MEO-C08-1", "RA-MEO-C08-4", "RA-PROJET-C08-1"],
-                tips: [
-                    "Rédiger un bilan d'impact environnemental ou éco-conception pour votre application.",
-                    "Présenter une analyse du cycle de vie (ACV) simplifiée."
-                ]
-            },
-            "C10": {
-                title: "C10 : Contribuer à la dynamique du projet d'équipe",
-                desc: "S'impliquer activement dans la réalisation collective.",
-                ras: ["RA-ESE-C09-1", "RA-ESE-C09-2", "RA-HUM-C09-1", "RA-HUM-C09-3", "RA-HUM-C09-4", "RA-HUM-C09-5", "RA-HUM-C09-6", "RA-HUM-C09-7", "RA-HUM-C09-8", "RA-MEO-C09-1", "RA-MEO-C09-2"],
-                tips: [
-                    "Avoir un historique de commits Git régulier et équilibré.",
-                    "Aider un coéquipier lors d'une session de débogage."
-                ]
-            },
-            "C11": {
-                title: "C11 : S'engager et entreprendre à l'échelle de l'entreprise",
-                desc: "Comprendre le contexte économique et être force de proposition.",
-                ras: ["RA-HUM-C11-1", "RA-ICT-C11-1", "RA-MEO-C11-1"],
-                tips: [
-                    "Proposer un Business Model Canvas pour le projet.",
-                    "Réaliser un Pitch vidéo de 3 minutes valorisant la valeur ajoutée."
-                ]
-            },
-            "C12": {
-                title: "C12 : Exercer son métier d'ingénieur, en anglais comme en français",
-                desc: "Communiquer professionnellement dans un contexte multilingue.",
-                ras: ["RA-ERD-C12-1", "RA-HUM-C12-1", "RA-HUM-C12-2", "RA-HUM-C12-4"],
-                tips: [
-                    "Rédiger la documentation technique `README.md` en anglais.",
-                    "Effectuer une soutenance orale du Pitch en anglais."
-                ]
-            },
-            "C13": {
-                title: "C13 : Discerner, affiner ses désirs, identifier son système de valeurs",
-                desc: "Prendre du recul sur sa pratique professionnelle et son projet d'avenir.",
-                ras: ["RA-ERD-C12-1", "RA-HUM-C12-1", "RA-HUM-C12-2", "RA-HUM-C12-4"],
-                tips: [
-                    "Rédiger un bilan de compétences réflexif dans `CARNET.md`.",
-                    "Conduire un entretien individuel de recul réflexif avec le tuteur."
-                ]
-            }
+            "C01": { title: "C01 : Acquérir et mémoriser des connaissances", desc: "Acquérir, structurer et restituer les bases scientifiques et techniques.", ras: ["RA-EEE-C01-1", "RA-ESE-C01-1", "RA-HUM-C01-1", "RA-MIA-C01-1", "RA-MME-C01-1"] },
+            "C02": { title: "C02 : Organiser ses connaissances théoriques et expérimentales", desc: "Relier la théorie à la pratique dans des TP ou projets d'ingénierie.", ras: ["RA-EEE-C02-1", "RA-ESE-C02-1", "RA-ICT-C02-1", "RA-MME-C02-1", "RA-PROJET-C02-1"] },
+            "C03": { title: "C03 : Rédiger un cahier des charges", desc: "Formaliser les besoins du client et traduire les exigences fonctionnelles.", ras: ["RA-EEE-C02-1", "RA-ESE-C02-1", "RA-PROJET-C02-1"] },
+            "C04": { title: "C04 : Entreprendre un travail d'innovation", desc: "Proposer des solutions originales basées sur une veille scientifique.", ras: ["RA-EEE-C03-1", "RA-ESE-C03-1", "RA-HUM-C03-1", "RA-PROJET-C03-1"] },
+            "C05": { title: "C05 : Mener une démarche scientifique en mode collaboratif", desc: "Travailler efficacement en équipe scientifique ou technique.", ras: ["RA-HUM-C05-1", "RA-PROJET-C05-2"] },
+            "C06": { title: "C06 : Rechercher et extraire des informations pertinentes", desc: "Savoir analyser une documentation technique complexe.", ras: ["RA-HUM-C06-1", "RA-HUM-C06-2", "RA-MEO-C06-1"] },
+            "C07": { title: "C07 : Développer une posture de pilote d'activité industrielle", desc: "Planifier, gérer les ressources et suivre l'avancement d'un projet.", ras: ["RA-MEO-C07-1", "RA-MEO-C07-2", "RA-PROJET-C07-1"] },
+            "C08": { title: "C08 : Manager les équipes", desc: "Animer la dynamique de groupe, communiquer et gérer les conflits.", ras: ["RA-HUM-C08-1", "RA-MEO-C08-1", "RA-PROJET-C08-1"] },
+            "C09": { title: "C09 : Intégrer les enjeux de la planète et de l'humain", desc: "Prendre en compte le développement durable, la RSE et l'éthique.", ras: ["RA-HUM-C08-1", "RA-MEO-C08-4"] },
+            "C10": { title: "C10 : Contribuer à la dynamique du projet d'équipe", desc: "S'impliquer activement dans la réalisation collective.", ras: ["RA-ESE-C09-1", "RA-HUM-C09-1", "RA-MEO-C09-1"] },
+            "C11": { title: "C11 : S'engager et entreprendre à l'échelle de l'entreprise", desc: "Comprendre le contexte économique et être force de proposition.", ras: ["RA-HUM-C11-1", "RA-ICT-C11-1", "RA-MEO-C11-1"] },
+            "C12": { title: "C12 : Exercer son métier d'ingénieur en anglais/français", desc: "Communiquer professionnellement dans un contexte multilingue.", ras: ["RA-ERD-C12-1", "RA-HUM-C12-1", "RA-HUM-C12-2"] },
+            "C13": { title: "C13 : Discerner, affiner ses désirs et valeurs", desc: "Prendre du recul sur sa pratique professionnelle.", ras: ["RA-ERD-C12-1", "RA-HUM-C12-4"] }
         };
 
-        // State Management
         let currentUser = null;
+        let userScores = {};
+        let userValidation = {};
+        let importedEvents = [];
         let radarChartInstance = null;
-        let userScores = {}; // Stores currentUser's scores per RA
-        let userValidation = {}; // Stores date, referee, status, proof per comp
 
-        // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
             loadCompetenceOptions();
             checkExistingSession();
         });
+
+        function switchTab(tab) {
+            ['referentiel', 'planning', 'classement'].forEach(t => {
+                document.getElementById(`sec${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
+                document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white";
+            });
+            document.getElementById(`sec${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
+            document.getElementById(`tabBtn${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "px-3 py-1.5 rounded-lg font-medium transition bg-icam-red text-white";
+        }
 
         function checkExistingSession() {
             const saved = localStorage.getItem('icam_user_session');
@@ -454,19 +339,15 @@
             const email = document.getElementById('userEmailInput').value.trim().toLowerCase();
             const promo = document.getElementById('userPromoInput').value;
 
-            // Valide les adresses type : nom.prenom@2026.icam.fr ou @student.icam.fr ou @icam.fr
             const icamRegex = /@(\d{4}\.)?(student\.)?icam\.fr$/i;
-
             if (!icamRegex.test(email)) {
                 document.getElementById('emailError').classList.remove('hidden');
                 return;
             }
 
             document.getElementById('emailError').classList.add('hidden');
-
             currentUser = { name, email, promo };
             localStorage.setItem('icam_user_session', JSON.stringify(currentUser));
-
             loadUserData();
             document.getElementById('authModal').classList.add('hidden');
             updateUserHeader();
@@ -484,7 +365,6 @@
         }
 
         function loadUserData() {
-            // Load user specific scores from LocalStorage
             const storedScores = localStorage.getItem(`icam_scores_${currentUser.email}`);
             userScores = storedScores ? JSON.parse(storedScores) : {};
 
@@ -494,14 +374,32 @@
             renderCompetenceDetails();
             updateGlobalStats();
             renderClassTable();
+            renderEventsList();
         }
 
         function saveUserData() {
             if (!currentUser) return;
+
             localStorage.setItem(`icam_scores_${currentUser.email}`, JSON.stringify(userScores));
             localStorage.setItem(`icam_val_${currentUser.email}`, JSON.stringify(userValidation));
+
+            // Envoi au serveur PythonAnywhere
+            fetch('/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: currentUser.name,
+                    email: currentUser.email,
+                    promo: currentUser.promo,
+                    scores: userScores,
+                    validation: userValidation,
+                    updatedAt: new Date().toISOString()
+                })
+            }).catch(err => console.error("Erreur d'enregistrement serveur :", err));
+
             updateGlobalStats();
             renderClassTable();
+            renderEventsList();
         }
 
         function loadCompetenceOptions() {
@@ -522,38 +420,23 @@
             document.getElementById('compTitle').textContent = comp.title;
             document.getElementById('compDescription').textContent = comp.desc;
 
-            // Render Tips
-            const tipsContainer = document.getElementById('compTipsList');
-            tipsContainer.innerHTML = '';
-            comp.tips.forEach(tip => {
-                const li = document.createElement('li');
-                li.textContent = tip;
-                tipsContainer.appendChild(li);
-            });
-
-            // Render RAs list
             const raContainer = document.getElementById('raListContainer');
             raContainer.innerHTML = '';
 
             comp.ras.forEach(ra => {
-                const score = userScores[ra] !== undefined ? userScores[ra] : 50; // default 50%
+                const score = userScores[ra] !== undefined ? userScores[ra] : 50;
                 const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm";
+                div.className = "bg-white p-3 rounded-lg border border-slate-200 flex items-center justify-between shadow-sm";
                 div.innerHTML = `
-                    <div class="flex-1">
-                        <span class="font-mono text-xs font-bold text-slate-700">${ra}</span>
-                    </div>
+                    <span class="font-mono text-xs font-bold text-slate-700">${ra}</span>
                     <div class="flex items-center space-x-3">
-                        <input type="range" min="0" max="100" step="5" value="${score}" 
-                            oninput="updateRaScore('${ra}', this.value)" 
-                            class="w-32 accent-icam-red cursor-pointer">
-                        <span class="text-xs font-bold w-10 text-right text-slate-800" id="val_${ra}">${score}%</span>
+                        <input type="range" min="0" max="100" step="5" value="${score}" oninput="updateRaScore('${ra}', this.value)" class="w-28 accent-icam-red cursor-pointer">
+                        <span class="text-xs font-bold w-10 text-right" id="val_${ra}">${score}%</span>
                     </div>
                 `;
                 raContainer.appendChild(div);
             });
 
-            // Load Validation details for this competence
             const valData = userValidation[compKey] || { date: '', referee: 'Tuteur ICAM', status: 'Non commencé', proof: '' };
             document.getElementById('valDate').value = valData.date || '';
             document.getElementById('valReferee').value = valData.referee || 'Tuteur ICAM';
@@ -567,8 +450,7 @@
             userScores[ra] = parseInt(value);
             document.getElementById(`val_${ra}`).textContent = `${value}%`;
             saveUserData();
-            const compKey = document.getElementById('competenceSelect').value;
-            renderRadarChart(compKey);
+            renderRadarChart(document.getElementById('competenceSelect').value);
         }
 
         function updateValidationDetails() {
@@ -585,184 +467,165 @@
         function renderRadarChart(compKey) {
             const comp = COMPETENCES_DB[compKey];
             const labels = comp.ras;
-
-            // Compute current user scores array
             const userData = labels.map(ra => userScores[ra] !== undefined ? userScores[ra] : 50);
 
-            // Mocked class avg & top score for realistic radar comparison
-            const classAvgData = labels.map((ra, idx) => Math.min(100, Math.max(20, (userData[idx] + 20 * (idx % 3 + 1)) % 80 + 30)));
-            const topStudentData = labels.map(() => 95);
-
             const ctx = document.getElementById('competenceRadarChart').getContext('2d');
-
-            if (radarChartInstance) {
-                radarChartInstance.destroy();
-            }
+            if (radarChartInstance) radarChartInstance.destroy();
 
             radarChartInstance = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: labels,
-                    datasets: [
-                        {
-                            label: 'Votre niveau',
-                            data: userData,
-                            backgroundColor: 'rgba(16, 185, 129, 0.25)',
-                            borderColor: '#10B981',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#10B981'
-                        },
-                        {
-                            label: 'Moyenne Classe',
-                            data: classAvgData,
-                            backgroundColor: 'rgba(96, 165, 250, 0.15)',
-                            borderColor: '#60A5FA',
-                            borderWidth: 1.5,
-                            borderDash: [4, 4],
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Top Classe',
-                            data: topStudentData,
-                            backgroundColor: 'rgba(251, 191, 36, 0.05)',
-                            borderColor: '#FBBF24',
-                            borderWidth: 1,
-                            borderDash: [2, 2],
-                            pointRadius: 0
-                        }
-                    ]
+                    datasets: [{
+                        label: 'Votre niveau',
+                        data: userData,
+                        backgroundColor: 'rgba(227, 6, 19, 0.2)',
+                        borderColor: '#E30613',
+                        borderWidth: 2
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            min: 0,
-                            max: 100,
-                            ticks: { stepSize: 25, display: false },
-                            pointLabels: { font: { size: 9, weight: 'bold' }, color: '#475569' }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
+                    scales: { r: { min: 0, max: 100, ticks: { display: false } } },
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
         function updateGlobalStats() {
-            // Calculate overall percentage
             const allKeys = Object.keys(userScores);
             let sum = 0;
             if (allKeys.length > 0) {
                 allKeys.forEach(k => sum += userScores[k]);
-                const avg = Math.round(sum / allKeys.length);
-                document.getElementById('userOverallScore').textContent = `${avg}%`;
-            } else {
-                document.getElementById('userOverallScore').textContent = '50%';
+                document.getElementById('userOverallScore').textContent = `${Math.round(sum / allKeys.length)}%`;
             }
 
-            // Count validated competences
             let valCount = 0;
+            let earliestDate = null;
             Object.keys(userValidation).forEach(k => {
                 if (userValidation[k].status === 'Validé') valCount++;
+                if (userValidation[k].date) {
+                    if (!earliestDate || new Date(userValidation[k].date) < new Date(earliestDate)) {
+                        earliestDate = userValidation[k].date;
+                    }
+                }
             });
             document.getElementById('validatedCount').textContent = `${valCount} / 13`;
+            document.getElementById('nextDeadlineText').textContent = earliestDate ? earliestDate : "Aucune définie";
         }
 
         function renderClassTable() {
             const tbody = document.getElementById('classTableBody');
             tbody.innerHTML = '';
-
             const students = [
-                { name: currentUser ? currentUser.name + " (Vous)" : "Moi", promo: currentUser ? currentUser.promo : "Bachelor", score: document.getElementById('userOverallScore').textContent, ready: document.getElementById('validatedCount').textContent, date: 'Aujourd\'hui', isMe: true },
-                { name: "Camille Bernard", promo: "Bachelor International", score: "78%", ready: "8 / 13", date: "Hier", isMe: false },
-                { name: "Lucas Moreau", promo: "Bachelor International", score: "64%", ready: "5 / 13", date: "Il y a 2 jours", isMe: false },
-                { name: "Sonia Dubois", promo: "Ingénieur Apprentissage", score: "94%", ready: "12 / 13", date: "Aujourd'hui", isMe: false }
+                { name: currentUser ? currentUser.name + " (Vous)" : "Moi", promo: currentUser ? currentUser.promo : "Bachelor", score: document.getElementById('userOverallScore').textContent, ready: document.getElementById('validatedCount').textContent },
+                { name: "Camille Bernard", promo: "Bachelor International", score: "78%", ready: "8 / 13" },
+                { name: "Sonia Dubois", promo: "Ingénieur Apprentissage", score: "92%", ready: "12 / 13" }
             ];
 
             students.forEach(st => {
                 const tr = document.createElement('tr');
-                tr.className = st.isMe ? "bg-emerald-50/50 font-semibold" : "hover:bg-slate-50";
+                tr.className = "hover:bg-slate-50";
                 tr.innerHTML = `
-                    <td class="py-3 px-4 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-user text-slate-400 text-base"></i>
-                        <span>${st.name}</span>
-                    </td>
+                    <td class="py-3 px-4 font-semibold">${st.name}</td>
                     <td class="py-3 px-4 text-slate-500">${st.promo}</td>
-                    <td class="py-3 px-4 font-bold ${st.isMe ? 'text-emerald-700' : 'text-slate-800'}">${st.score}</td>
+                    <td class="py-3 px-4 font-bold text-icam-red">${st.score}</td>
                     <td class="py-3 px-4">${st.ready}</td>
-                    <td class="py-3 px-4 text-slate-400">${st.date}</td>
-                    <td class="py-3 px-4 text-right">
-                        ${st.isMe ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full"><i class="fa-solid fa-pen mr-1"></i>Modifiable</span>' : '<span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-full"><i class="fa-solid fa-eye mr-1"></i>Lecture seule</span>'}
-                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Calendar Integrations
-        function addToGoogleCalendar() {
-            const compKey = document.getElementById('competenceSelect').value;
-            const comp = COMPETENCES_DB[compKey];
-            const valData = userValidation[compKey];
+        // Parsing ICS & Gestion Événements
+        function importIcsFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                parseAndStoreIcs(e.target.result);
+            };
+            reader.readAsText(file);
+        }
 
-            if (!valData || !valData.date) {
-                alert("Veuillez d'abord sélectionner une date limite de validation.");
+        function importIcalUrl() {
+            const url = document.getElementById('icalUrlInput').value.trim();
+            if (!url) return alert("Colle un lien iCal valide.");
+            fetch(url)
+                .then(res => res.text())
+                .then(text => parseAndStoreIcs(text))
+                .catch(() => alert("Impossible d'accéder au lien iCal directement (CORS). Importe le fichier .ics directement."));
+        }
+
+        function parseAndStoreIcs(icsText) {
+            const lines = icsText.split(/\r\n|\n/);
+            let currentEvent = null;
+            importedEvents = [];
+
+            lines.forEach(line => {
+                if (line.startsWith('BEGIN:VEVENT')) {
+                    currentEvent = {};
+                } else if (line.startsWith('END:VEVENT')) {
+                    if (currentEvent && currentEvent.summary) importedEvents.push(currentEvent);
+                    currentEvent = null;
+                } else if (currentEvent) {
+                    if (line.startsWith('SUMMARY:')) currentEvent.summary = line.replace('SUMMARY:', '');
+                    if (line.startsWith('DTSTART:')) currentEvent.date = line.replace('DTSTART:', '').substring(0, 8);
+                }
+            });
+
+            renderEventsList();
+            alert(`${importedEvents.length} événements importés avec succès !`);
+        }
+
+        function renderEventsList() {
+            const container = document.getElementById('calendarEventsContainer');
+            container.innerHTML = '';
+
+            let list = [...importedEvents];
+
+            // Ajoute aussi les dates limites définies pour les compétences
+            Object.keys(userValidation).forEach(key => {
+                if (userValidation[key].date) {
+                    list.push({
+                        summary: `Validation ${COMPETENCES_DB[key].title}`,
+                        date: userValidation[key].date.replace(/-/g, ''),
+                        isValidation: true
+                    });
+                }
+            });
+
+            document.getElementById('eventCountBadge').textContent = `${list.length} événement(s)`;
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
+                        <i class="fa-solid fa-calendar-xmark text-2xl mb-2 text-slate-300"></i>
+                        <p>Aucun événement importé ou planifié.</p>
+                    </div>`;
                 return;
             }
 
-            const formattedDate = valData.date.replace(/-/g, '');
-            const title = encodeURIComponent(`Validation ICAM : ${comp.title}`);
-            const details = encodeURIComponent(`Référent : ${valData.referee}\nLien Preuve : ${valData.proof || 'Aucun'}`);
-            
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formattedDate}T090000Z/${formattedDate}T100000Z&details=${details}`;
-            window.open(url, '_blank');
-        }
-
-        function downloadICS() {
-            const compKey = document.getElementById('competenceSelect').value;
-            const comp = COMPETENCES_DB[compKey];
-            const valData = userValidation[compKey];
-
-            if (!valData || !valData.date) {
-                alert("Veuillez d'abord sélectionner une date limite de validation.");
-                return;
-            }
-
-            const formattedDate = valData.date.replace(/-/g, '');
-            const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//ICAM//Competence Tracker//FR
-BEGIN:VEVENT
-SUMMARY:Validation ICAM - ${comp.title}
-DESCRIPTION:Référent: ${valData.referee}
-DTSTART:${formattedDate}T090000Z
-DTEND:${formattedDate}T100000Z
-END:VEVENT
-END:VCALENDAR`;
-
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.setAttribute('download', `validation_${compKey}.ics`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function exportClassData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
-                user: currentUser,
-                scores: userScores,
-                validation: userValidation
-            }, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `icam_competences_${currentUser ? currentUser.name.replace(/\s+/g, '_') : 'export'}.json`);
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
+            list.forEach(ev => {
+                const formattedDate = ev.date ? `${ev.date.substring(6,8)}/${ev.date.substring(4,6)}/${ev.date.substring(0,4)}` : "S.D";
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-xl border flex items-center justify-between text-xs ${ev.isValidation ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'}`;
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 rounded-lg ${ev.isValidation ? 'bg-amber-200 text-amber-800' : 'bg-blue-100 text-blue-600'}">
+                            <i class="fa-solid ${ev.isValidation ? 'fa-award' : 'fa-graduation-cap'}"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-800">${ev.summary}</div>
+                            <div class="text-[10px] text-slate-500"><i class="fa-regular fa-clock mr-1"></i>${formattedDate}</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] px-2 py-1 rounded-full font-bold ${ev.isValidation ? 'bg-amber-200 text-amber-900' : 'bg-slate-100 text-slate-600'}">
+                        ${ev.isValidation ? 'Validation ICAM' : 'Examen/Cours'}
+                    </span>
+                `;
+                container.appendChild(div);
+            });
         }
     </script>
 </body>
