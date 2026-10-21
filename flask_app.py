@@ -47,7 +47,6 @@ def get_students():
     return jsonify(get_all_data())
 
 
-# Proxy iCal sécurisé avec encodage des caractères spéciaux
 @app.route("/api/fetch-ical", methods=["POST"])
 def fetch_ical():
     data = request.get_json()
@@ -56,16 +55,12 @@ def fetch_ical():
     if not url:
         return jsonify({"status": "error", "message": "URL manquante"}), 400
 
-    # 1. Correction des caractères issus du copier-coller (&param -> ¶m)
-    url = url.replace("¶m=", "&param=")
-    url = url.replace("¶", "&para")
+    url = url.replace("¶m=", "&param=").replace("¶", "&para")
 
-    # 2. Conversion webcal
     if url.startswith("webcal://"):
         url = "https://" + url[9:]
 
     try:
-        # 3. Encodage propre des caractères non-ASCII de l'URL
         parsed_url = urllib.parse.urlsplit(url)
         encoded_path = urllib.parse.quote(parsed_url.path)
         encoded_query = urllib.parse.quote(parsed_url.query, safe="=&?%")
