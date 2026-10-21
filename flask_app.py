@@ -2,15 +2,16 @@ import json
 import os
 import urllib.parse
 import urllib.request
+import uuid
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__)
 DATA_FILE = "students_data.json"
+EVALS_FILE = "evaluations.json"
 
 # Adresses autorisées comme administrateurs (ajoute tes co-admins dans cette liste)
 ADMIN_EMAILS = [
     "martin.dupont@2031.icam.fr",
-    # "coadmin.exemple@2031.icam.fr",
 ]
 
 
@@ -38,6 +39,21 @@ def get_all_data():
 def save_all_data(data):
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def get_custom_evals():
+    if not os.path.exists(EVALS_FILE):
+        return []
+    with open(EVALS_FILE, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except Exception:
+            return []
+
+
+def save_custom_evals(evals):
+    with open(EVALS_FILE, "w", encoding="utf-8") as f:
+        json.dump(evals, f, ensure_ascii=False, indent=2)
 
 
 @app.route("/")
@@ -90,6 +106,116 @@ def delete_student():
             "message": f"Compte {target_email} supprimé.",
         })
     return jsonify({"status": "error", "message": "Élève introuvable."}), 404
+
+
+# API ÉVALUATIONS ET PROPOSITIONS
+@app.route("/api/evaluations", methods=["GET"])
+def get_evaluations():
+    return jsonify(get_custom_evals())
+
+
+# Proposer une évaluation (Tout étudiant)
+@app.route("/api/propose-evaluation", methods=["POST"])
+def propose_evaluation():
+    payload = request.get_json() or {}
+    title = payload.get("title", "").strip()
+    date_str = payload.get("date", "").strip()
+    comp = payload.get("competence", "").strip()
+    student_email = payload.get("studentEmail", "").strip().lower()
+
+    if not title or not date_str or not student_email:
+        return jsonify({"status": "error", "message": "Informations manquantes"}), 400
+
+    evals = get_custom_evals()
+    new_eval = {
+        "id": str(uuid.uuid4())[:8],
+        "title": title,
+        "date": date_str,
+        "competence": comp,
+        "proposedBy": student_email,
+        "status": "pending",  # En attente de validation admin
+    }
+    evals.append(new_eval)
+    save_custom_evals(evals)
+
+    return jsonify({
+        "status": "success",
+        "message": "Proposition transmise aux administrateurs.",
+        "eval": new_eval,
+    })
+
+
+# Valider une évaluation (Admin uniquement)
+@app.route("/api/admin/approve-evaluation", methods=["POST"])
+def approve_evaluation():
+    payload = request.get_json() or {}
+    admin_email = payload.get("adminEmail", "").strip().lower()
+    eval_id = payload.get("evalId", "").strip()
+
+    if admin_email not in ADMIN_EMAILS:
+        return jsonify({"status": "error", "message": "Accès refusé."}), 403
+
+    evals = get_custom_evals()
+    found = False
+    for e in evals:
+        if e.get("id") == eval_id:
+            e["status"] = "approved"
+            e["approvedBy"] = admin_email
+            found = True
+            break
+
+    if found:
+        save_custom_evals(evals)
+        return jsonify({"status": "success", "message": "Évaluation validée et officialisée."})
+    return jsonify({"status": "error", "message": "Évaluation introuvable."}), 404
+
+
+# Ajouter directement une évaluation (Admin uniquement)
+@app.route("/api/admin/add-evaluation", methods=["POST"])
+def add_evaluation():
+    payload = request.get_json() or {}
+    admin_email = payload.get("adminEmail", "").strip().lower()
+
+    if admin_email not in ADMIN_EMAILS:
+        return jsonify({"status": "error", "message": "Accès refusé."}), 403
+
+    title = payload.get("title", "").strip()
+    date_str = payload.get("date", "").strip()
+    comp = payload.get("competence", "").strip()
+
+    if not title or not date_str:
+        return jsonify({"status": "error", "message": "Titre et date requis"}), 400
+
+    evals = get_custom_evals()
+    new_eval = {
+        "id": str(uuid.uuid4())[:8],
+        "title": title,
+        "date": date_str,
+        "competence": comp,
+        "proposedBy": admin_email,
+        "status": "approved",  # Directement approuvée
+    }
+    evals.append(new_eval)
+    save_custom_evals(evals)
+
+    return jsonify({"status": "success", "message": "Évaluation ajoutée", "eval": new_eval})
+
+
+# Supprimer une évaluation (Admin uniquement)
+@app.route("/api/admin/delete-evaluation", methods=["POST"])
+def delete_evaluation():
+    payload = request.get_json() or {}
+    admin_email = payload.get("adminEmail", "").strip().lower()
+    eval_id = payload.get("evalId", "").strip()
+
+    if admin_email not in ADMIN_EMAILS:
+        return jsonify({"status": "error", "message": "Accès refusé."}), 403
+
+    evals = get_custom_evals()
+    evals = [e for e in evals if e.get("id") != eval_id]
+    save_custom_evals(evals)
+
+    return jsonify({"status": "success", "message": "Évaluation supprimée"})
 
 
 @app.route("/api/fetch-ical", methods=["POST"])
