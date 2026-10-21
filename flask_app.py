@@ -73,7 +73,6 @@ def save_student():
     payload["email"] = email
     db = get_all_data()
 
-    # Si l'élève existe déjà, on préserve ses validations/notes existantes s'il en manque
     if email in db:
         old_data = db[email]
         if "scores" in old_data and "scores" in payload:
@@ -85,10 +84,8 @@ def save_student():
     return jsonify({"status": "success", "message": "Sauvegardé avec succès"})
 
 
-# API de synchronisation directe depuis le script PITCH
 @app.route("/api/sync-pitch", methods=["POST", "OPTIONS"])
 def sync_pitch():
-    # Gestion des règles CORS pour autoriser l'envoi depuis pitch-icam.rima1.fr
     if request.method == "OPTIONS":
         res = jsonify({"status": "ok"})
         res.headers["Access-Control-Allow-Origin"] = "*"
@@ -106,17 +103,27 @@ def sync_pitch():
         return res, 400
 
     db = get_all_data()
-    student = db.get(email, {"name": email.split("@")[0].replace(".", " ").title(), "email": email, "promo": "Bachelor International"})
-    
+    student = db.get(
+        email,
+        {
+            "name": email.split("@")[0].replace(".", " ").title(),
+            "email": email,
+            "promo": "Bachelor International",
+        },
+    )
+
     if "scores" not in student:
         student["scores"] = {}
-    
+
     student["scores"].update(scores)
     student["updatedAt"] = payload.get("updatedAt", "")
     db[email] = student
     save_all_data(db)
 
-    res = jsonify({"status": "success", "message": f"Synchronisation réussie pour {email} ! {len(scores)} compétences importées."})
+    res = jsonify({
+        "status": "success",
+        "message": f"Synchronisation réussie pour {email} ! {len(scores)} compétences importées.",
+    })
     res.headers["Access-Control-Allow-Origin"] = "*"
     return res
 
@@ -207,7 +214,10 @@ def approve_evaluation():
 
     if found:
         save_custom_evals(evals)
-        return jsonify({"status": "success", "message": "Évaluation validée et officialisée."})
+        return jsonify({
+            "status": "success",
+            "message": "Évaluation validée et officialisée.",
+        })
     return jsonify({"status": "error", "message": "Évaluation introuvable."}), 404
 
 
