@@ -43,12 +43,12 @@
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nom Complet</label>
-                    <input type="text" id="userNameInput" required placeholder="ex: Martin Dupont" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red focus:border-icam-red text-sm outline-none">
+                    <input type="text" id="userNameInput" required placeholder="ex : Martin Dupont" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red focus:border-icam-red text-sm outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Adresse Email ICAM</label>
-                    <input type="email" id="userEmailInput" required placeholder="nom.prenom@student.2031.icam.fr" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red focus:border-icam-red text-sm outline-none">
-                    <p id="emailError" class="text-red-500 text-xs mt-1 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Veuillez utiliser un email @icam.fr ou @student.icam.fr</p>
+                    <input type="email" id="userEmailInput" required placeholder="nom.prenom@2026.icam.fr" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red focus:border-icam-red text-sm outline-none">
+                    <p id="emailError" class="text-red-500 text-xs mt-1 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Veuillez utiliser un email ICAM valide (ex : nom.prenom@2026.icam.fr)</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Promotion / Parcours</label>
@@ -454,7 +454,10 @@
             const email = document.getElementById('userEmailInput').value.trim().toLowerCase();
             const promo = document.getElementById('userPromoInput').value;
 
-            if (!email.endsWith('@icam.fr') && !email.endsWith('@student.icam.fr')) {
+            // Valide les adresses type : nom.prenom@2026.icam.fr ou @student.icam.fr ou @icam.fr
+            const icamRegex = /@(\d{4}\.)?(student\.)?icam\.fr$/i;
+
+            if (!icamRegex.test(email)) {
                 document.getElementById('emailError').classList.remove('hidden');
                 return;
             }
@@ -533,7 +536,7 @@
             raContainer.innerHTML = '';
 
             comp.ras.forEach(ra => {
-                const score = userScores[ra] || 50; // default 50%
+                const score = userScores[ra] !== undefined ? userScores[ra] : 50; // default 50%
                 const div = document.createElement('div');
                 div.className = "bg-white p-3 rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm";
                 div.innerHTML = `
@@ -588,7 +591,7 @@
 
             // Mocked class avg & top score for realistic radar comparison
             const classAvgData = labels.map((ra, idx) => Math.min(100, Math.max(20, (userData[idx] + 20 * (idx % 3 + 1)) % 80 + 30)));
-            const topStudentData = labels.map(ra => 95);
+            const topStudentData = labels.map(() => 95);
 
             const ctx = document.getElementById('competenceRadarChart').getContext('2d');
 
@@ -711,7 +714,7 @@
 
             const formattedDate = valData.date.replace(/-/g, '');
             const title = encodeURIComponent(`Validation ICAM : ${comp.title}`);
-            const details = encodeURIComponent(`Référent: ${valData.referee}\nLien Preuve: ${valData.proof || 'Aucun'}`);
+            const details = encodeURIComponent(`Référent : ${valData.referee}\nLien Preuve : ${valData.proof || 'Aucun'}`);
             
             const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formattedDate}T090000Z/${formattedDate}T100000Z&details=${details}`;
             window.open(url, '_blank');
