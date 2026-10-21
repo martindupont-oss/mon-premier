@@ -7,8 +7,11 @@ from flask import Flask, jsonify, request, send_from_directory
 app = Flask(__name__)
 DATA_FILE = "students_data.json"
 
-# Liste des adresses autorisées à administrer et supprimer des comptes
-ADMIN_EMAILS = ["martin.dupont@2026.icam.fr", "martin.dupont@icam.fr"]
+# Adresses autorisées comme administrateurs (ajoute tes co-admins dans cette liste)
+ADMIN_EMAILS = [
+    "martin.dupont@2031.icam.fr",
+    "coadmin.exemple@2031.icam.fr",  # <--- Remplace ou ajoute d'autres emails ici
+]
 
 
 def get_all_data():
@@ -63,7 +66,6 @@ def get_students():
     return jsonify(get_all_data())
 
 
-# Route d'administration pour supprimer un élève
 @app.route("/api/admin/delete-student", methods=["POST"])
 def delete_student():
     payload = request.get_json() or {}
