@@ -9,11 +9,24 @@ DATA_FILE = "students_data.json"
 
 
 def get_all_data():
+    """Charge et nettoie les données pour éviter tout doublon d'email."""
     if not os.path.exists(DATA_FILE):
         return {}
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         try:
-            return json.load(f)
+            raw_db = json.load(f)
+            cleaned_db = {}
+            for k, v in raw_db.items():
+                clean_email = k.strip().lower()
+                # En cas de doublon, on conserve la mise à jour la plus récente
+                if clean_email in cleaned_db:
+                    old_date = cleaned_db[clean_email].get("updatedAt", "")
+                    new_date = v.get("updatedAt", "")
+                    if new_date >= old_date:
+                        cleaned_db[clean_email] = v
+                else:
+                    cleaned_db[clean_email] = v
+            return cleaned_db
         except Exception:
             return {}
 
@@ -31,13 +44,15 @@ def home():
 
 @app.route("/api/save", methods=["POST"])
 def save_student():
-    payload = request.get_json()
-    email = payload.get("email")
+    payload = request.get_json() or {}
+    email = payload.get("email", "").strip().lower()
+
     if not email:
         return jsonify({"status": "error", "message": "Email manquant"}), 400
 
+    payload["email"] = email  # Normalisation de l'email
     db = get_all_data()
-    db[email] = payload
+    db[email] = payload  # Écrasement/mise à jour de l'élève unique
     save_all_data(db)
     return jsonify({"status": "success", "message": "Sauvegardé avec succès"})
 
@@ -49,7 +64,7 @@ def get_students():
 
 @app.route("/api/fetch-ical", methods=["POST"])
 def fetch_ical():
-    data = request.get_json()
+    data = request.get_json() or {}
     url = data.get("url", "").strip()
 
     if not url:
