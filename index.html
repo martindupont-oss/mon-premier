@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICAM - Suivi des Compétences & Planning Évaluations</title>
+    <title>ICAM - Suivi des Compétences, PDF & Google Workspace</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -37,7 +37,7 @@
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">Portail ICAM</h2>
-                <p class="text-xs text-slate-500 mt-1">Connecte-toi avec ton adresse email officielle ICAM</p>
+                <p class="text-xs text-slate-500 mt-1">Connexion sécurisée avec ton email ICAM</p>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
@@ -48,7 +48,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Adresse Email ICAM</label>
                     <input type="email" id="userEmailInput" required placeholder="nom.prenom@2026.icam.fr" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-icam-red text-sm outline-none">
-                    <p id="emailError" class="text-red-500 text-xs mt-1 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Email ICAM non reconnu (ex. nom.prenom@2026.icam.fr)</p>
+                    <p id="emailError" class="text-red-500 text-xs mt-1 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i>Email ICAM non valide (ex. nom.prenom@2026.icam.fr)</p>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Promotion / Parcours</label>
@@ -71,8 +71,8 @@
             <div class="flex items-center space-x-3">
                 <div class="bg-icam-red text-white px-3 py-1.5 rounded-lg font-black text-xl tracking-wider">ICAM</div>
                 <div>
-                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Planning</h1>
-                    <p class="text-xs text-slate-400">Référentiel C01-C13 • Synchro Hyperplanning</p>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Hub Révision</h1>
+                    <p class="text-xs text-slate-400">Google Drive • PDF • Hyperplanning</p>
                 </div>
             </div>
 
@@ -122,8 +122,8 @@
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <div>
-                    <div class="text-xs text-slate-500 font-medium">Moyenne Classe</div>
-                    <div class="text-2xl font-bold text-slate-800" id="classAvgScore">58%</div>
+                    <div class="text-xs text-slate-500 font-medium">Élèves Inscrits</div>
+                    <div class="text-2xl font-bold text-slate-800" id="totalStudentsCount">1</div>
                 </div>
             </div>
 
@@ -153,7 +153,7 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Référentiel de Compétences</h2>
-                    <p class="text-xs text-slate-500">Sélectionne une compétence pour mettre à jour tes scores et planifier sa validation.</p>
+                    <p class="text-xs text-slate-500">Mets à jour tes scores, associe tes fiches de révision PDF et planifie tes validations.</p>
                 </div>
                 <div>
                     <select id="competenceSelect" onchange="renderCompetenceDetails()" class="bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-icam-red outline-none">
@@ -173,7 +173,7 @@
                     </div>
                 </div>
 
-                <!-- Détails & Validation -->
+                <!-- Détails, Révision PDF & Validation -->
                 <div class="lg:col-span-7 space-y-6">
                     <div>
                         <h3 id="compTitle" class="text-lg font-bold text-slate-800">---</h3>
@@ -186,9 +186,31 @@
                         <div id="raListContainer" class="space-y-3"></div>
                     </div>
 
-                    <!-- Formulaire Validation -->
+                    <!-- NOUVEAU : Fiches de Révision PDF & Google Drive -->
+                    <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4 space-y-3">
+                        <h4 class="text-xs font-bold text-blue-900 uppercase flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-pdf mr-2 text-red-600"></i>Fiche de révision PDF & Ressources Google Drive</span>
+                            <span class="text-[10px] text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">Espace Révision</span>
+                        </h4>
+                        <p class="text-xs text-blue-800">Colle ici le lien de ton cours PDF ou de ton dossier Google Drive pour réviser avant l'évaluation.</p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="url" id="valRevisionPdf" placeholder="https://drive.google.com/... ou lien PDF" onchange="updateValidationDetails()" class="flex-1 bg-white border border-slate-300 rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="openRevisionPdf()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 py-2 rounded-lg transition flex items-center justify-center">
+                                <i class="fa-solid fa-arrow-up-right-from-square mr-1.5"></i>Ouvrir le PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire Validation & Google Calendar -->
                     <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-4 space-y-4">
-                        <h4 class="text-xs font-bold text-amber-900 uppercase"><i class="fa-solid fa-clock mr-2"></i>Planification de la validation</h4>
+                        <h4 class="text-xs font-bold text-amber-900 uppercase flex items-center justify-between">
+                            <span><i class="fa-solid fa-clock mr-2"></i>Planification de la validation</span>
+                            <button onclick="syncCurrentCompToGoogleCalendar()" class="bg-white hover:bg-amber-100 border border-amber-300 text-amber-900 text-[11px] px-2.5 py-1 rounded-lg font-semibold transition flex items-center">
+                                <i class="fa-brands fa-google text-red-500 mr-1.5"></i>Ajouter à Google Calendar
+                            </button>
+                        </h4>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1">Date limite de validation</label>
@@ -215,8 +237,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Lien du livrable (GitHub, PDF)</label>
-                                <input type="url" id="valProof" placeholder="https://github.com/..." onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Lien du livrable (GitHub / Google Drive)</label>
+                                <input type="url" id="valProof" placeholder="https://drive.google.com/..." onchange="updateValidationDetails()" class="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs">
                             </div>
                         </div>
                     </div>
@@ -228,23 +250,23 @@
         <section id="secPlanning" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div>
                 <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-calendar-days text-icam-red mr-2"></i>Planning & Synchronisation des Évaluations</h2>
-                <p class="text-xs text-slate-500 mt-1">Importe ton emploi du temps Hyperplanning, Pronote ou Apple Calendrier pour voir tes examens et caler tes validations de compétences.</p>
+                <p class="text-xs text-slate-500 mt-1">Importe ton fichier `.ics` de cours/examens ou gère tes échéances de révision.</p>
             </div>
 
             <!-- Boîte d'importation iCal / ICS -->
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-link mr-1.5 text-blue-600"></i>Lien d'abonnement iCal (Hyperplanning / Pronote)</h3>
-                    <div class="flex gap-2">
-                        <input type="url" id="icalUrlInput" placeholder="https://planning.icam.fr/Telechargements/ical/..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red">
-                        <button onclick="importIcalUrl()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-700">Synchroniser</button>
-                    </div>
-                    <p class="text-[10px] text-slate-400 mt-1">Colle ton lien direct ICAM / Hyperplanning ici.</p>
+                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-file-arrow-up mr-1.5 text-emerald-600"></i>Importer un fichier `.ics` (Hyperplanning / Apple)</h3>
+                    <input type="file" id="icsFileInput" accept=".ics" onchange="importIcsFile(event)" class="text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer">
+                    <p class="text-[10px] text-slate-400 mt-1">Télécharge ton fichier `.ics` depuis Hyperplanning et importe-le ici.</p>
                 </div>
 
                 <div>
-                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-file-arrow-up mr-1.5 text-emerald-600"></i>Ou importer un fichier `.ics` (Apple / Outlook)</h3>
-                    <input type="file" id="icsFileInput" accept=".ics" onchange="importIcsFile(event)" class="text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer">
+                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-link mr-1.5 text-blue-600"></i>Lien d'abonnement iCal direct</h3>
+                    <div class="flex gap-2">
+                        <input type="url" id="icalUrlInput" placeholder="https://planning.icam.fr/..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red">
+                        <button onclick="importIcalUrl()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-700">Synchroniser</button>
+                    </div>
                 </div>
             </div>
 
@@ -264,20 +286,32 @@
             </div>
         </section>
 
-        <!-- ONGLET 3 : CLASSEMENT PROMO -->
+        <!-- ONGLET 3 : CLASSEMENT PROMO (DONNÉES RÉELLES PYTHONANYWHERE) -->
         <section id="secClassement" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
-            <h3 class="text-lg font-bold text-slate-800 mb-4">Avancement Général de la Promotion</h3>
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Avancement Général de la Promotion</h3>
+                    <p class="text-xs text-slate-500">Seuls les vrais élèves inscrits apparaîtront dans cette liste.</p>
+                </div>
+                <button onclick="renderClassTable()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition font-semibold">
+                    <i class="fa-solid fa-rotate-right mr-1"></i>Actualiser
+                </button>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse text-xs">
                     <thead>
                         <tr class="bg-slate-50 border-y border-slate-200 text-slate-500 font-semibold">
                             <th class="py-3 px-4">Élève</th>
+                            <th class="py-3 px-4">Email ICAM</th>
                             <th class="py-3 px-4">Promotion</th>
-                            <th class="py-3 px-4">Score Moyen C01-C13</th>
+                            <th class="py-3 px-4">Moyenne C01-C13</th>
                             <th class="py-3 px-4">Compétences Validées</th>
                         </tr>
                     </thead>
-                    <tbody id="classTableBody" class="divide-y divide-slate-100"></tbody>
+                    <tbody id="classTableBody" class="divide-y divide-slate-100">
+                        <!-- Rempli dynamiquement avec les vraies données du serveur -->
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -320,6 +354,10 @@
             });
             document.getElementById(`sec${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
             document.getElementById(`tabBtn${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "px-3 py-1.5 rounded-lg font-medium transition bg-icam-red text-white";
+            
+            if (tab === 'classement') {
+                renderClassTable();
+            }
         }
 
         function checkExistingSession() {
@@ -374,6 +412,7 @@
             updateGlobalStats();
             renderClassTable();
             renderEventsList();
+            saveUserData(); // Synchronisation initiale
         }
 
         function saveUserData() {
@@ -393,10 +432,9 @@
                     validation: userValidation,
                     updatedAt: new Date().toISOString()
                 })
-            }).catch(err => console.error("Erreur serveur :", err));
+            }).catch(err => console.error("Erreur enregistrement serveur :", err));
 
             updateGlobalStats();
-            renderClassTable();
             renderEventsList();
         }
 
@@ -435,11 +473,12 @@
                 raContainer.appendChild(div);
             });
 
-            const valData = userValidation[compKey] || { date: '', referee: 'Tuteur ICAM', status: 'Non commencé', proof: '' };
+            const valData = userValidation[compKey] || { date: '', referee: 'Tuteur ICAM', status: 'Non commencé', proof: '', revisionPdf: '' };
             document.getElementById('valDate').value = valData.date || '';
             document.getElementById('valReferee').value = valData.referee || 'Tuteur ICAM';
             document.getElementById('valStatus').value = valData.status || 'Non commencé';
             document.getElementById('valProof').value = valData.proof || '';
+            document.getElementById('valRevisionPdf').value = valData.revisionPdf || '';
 
             renderRadarChart(compKey);
         }
@@ -457,9 +496,37 @@
                 date: document.getElementById('valDate').value,
                 referee: document.getElementById('valReferee').value,
                 status: document.getElementById('valStatus').value,
-                proof: document.getElementById('valProof').value
+                proof: document.getElementById('valProof').value,
+                revisionPdf: document.getElementById('valRevisionPdf').value
             };
             saveUserData();
+        }
+
+        function openRevisionPdf() {
+            const url = document.getElementById('valRevisionPdf').value.trim();
+            if (!url) {
+                alert("Entre d'abord un lien de document PDF ou Google Drive.");
+                return;
+            }
+            window.open(url, '_blank');
+        }
+
+        function syncCurrentCompToGoogleCalendar() {
+            const compKey = document.getElementById('competenceSelect').value;
+            const comp = COMPETENCES_DB[compKey];
+            const dateVal = document.getElementById('valDate').value;
+
+            if (!dateVal) {
+                alert("Choisis d'abord une date limite de validation.");
+                return;
+            }
+
+            const formattedDate = dateVal.replace(/-/g, '');
+            const title = encodeURIComponent(`Validation ICAM : ${comp.title}`);
+            const details = encodeURIComponent(`Statut : ${document.getElementById('valStatus').value}\nLien de cours/preuve : ${document.getElementById('valRevisionPdf').value || document.getElementById('valProof').value || 'Aucun'}`);
+            
+            const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${formattedDate}T080000Z/${formattedDate}T090000Z&details=${details}`;
+            window.open(gcalUrl, '_blank');
         }
 
         function renderRadarChart(compKey) {
@@ -513,29 +580,58 @@
             document.getElementById('nextDeadlineText').textContent = earliestDate ? earliestDate : "Aucune définie";
         }
 
+        // CHARGEMENT EN DIRECT DES VRAIS ÉLÈVES (REMPLACE LES FAUX ÉLÈVES)
         function renderClassTable() {
             const tbody = document.getElementById('classTableBody');
-            tbody.innerHTML = '';
-            const students = [
-                { name: currentUser ? currentUser.name + " (Vous)" : "Moi", promo: currentUser ? currentUser.promo : "Bachelor", score: document.getElementById('userOverallScore').textContent, ready: document.getElementById('validatedCount').textContent },
-                { name: "Camille Bernard", promo: "Bachelor International", score: "78%", ready: "8 / 13" },
-                { name: "Sonia Dubois", promo: "Ingénieur Apprentissage", score: "92%", ready: "12 / 13" }
-            ];
+            tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Chargement des données...</td></tr>';
 
-            students.forEach(st => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50";
-                tr.innerHTML = `
-                    <td class="py-3 px-4 font-semibold">${st.name}</td>
-                    <td class="py-3 px-4 text-slate-500">${st.promo}</td>
-                    <td class="py-3 px-4 font-bold text-icam-red">${st.score}</td>
-                    <td class="py-3 px-4">${st.ready}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+            fetch('/api/students')
+                .then(res => res.json())
+                .then(db => {
+                    tbody.innerHTML = '';
+                    const emails = Object.keys(db);
+                    document.getElementById('totalStudentsCount').textContent = emails.length || 1;
+
+                    if (emails.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Aucun élève inscrit sur le serveur pour l\'instant.</td></tr>';
+                        return;
+                    }
+
+                    emails.forEach(email => {
+                        const st = db[email];
+                        let sum = 0;
+                        const scoreKeys = st.scores ? Object.keys(st.scores) : [];
+                        scoreKeys.forEach(k => sum += st.scores[k]);
+                        const avg = scoreKeys.length > 0 ? Math.round(sum / scoreKeys.length) : 0;
+
+                        let valCount = 0;
+                        if (st.validation) {
+                            Object.keys(st.validation).forEach(k => {
+                                if (st.validation[k].status === 'Validé') valCount++;
+                            });
+                        }
+
+                        const tr = document.createElement('tr');
+                        const isMe = currentUser && currentUser.email === st.email;
+                        tr.className = isMe ? "bg-emerald-50/60 font-semibold" : "hover:bg-slate-50";
+                        tr.innerHTML = `
+                            <td class="py-3 px-4 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-user ${isMe ? 'text-emerald-600' : 'text-slate-400'} text-base"></i>
+                                <span>${st.name || 'Élève'} ${isMe ? '<span class="text-[10px] text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">Vous</span>' : ''}</span>
+                            </td>
+                            <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${st.email}</td>
+                            <td class="py-3 px-4 text-slate-500">${st.promo || 'ICAM'}</td>
+                            <td class="py-3 px-4 font-bold ${isMe ? 'text-emerald-700' : 'text-icam-red'}">${avg}%</td>
+                            <td class="py-3 px-4">${valCount} / 13</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(() => {
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Mode hors-ligne (serveur non joint).</td></tr>';
+                });
         }
 
-        // Import iCal via le proxy Flask backend
         function importIcalUrl() {
             const url = document.getElementById('icalUrlInput').value.trim();
             if (!url) return alert("Colle un lien iCal valide.");
@@ -550,10 +646,10 @@
                 if (data.status === 'success') {
                     parseAndStoreIcs(data.content);
                 } else {
-                    alert("Erreur lors de la récupération du calendrier : " + data.message);
+                    alert("Erreur serveur : " + data.message);
                 }
             })
-            .catch(err => alert("Erreur de connexion au serveur."));
+            .catch(() => alert("Erreur de connexion."));
         }
 
         function importIcsFile(event) {
