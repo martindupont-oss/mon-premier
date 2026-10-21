@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICAM - Suivi des Compétences & Détection Évaluations</title>
+    <title>ICAM - Suivi des Compétences & Validation Évaluations</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -81,7 +81,7 @@
                     <i class="fa-solid fa-chart-radar mr-1.5"></i>Référentiel C01-C13
                 </button>
                 <button onclick="switchTab('planning')" id="tabBtnPlanning" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white">
-                    <i class="fa-solid fa-calendar-days mr-1.5"></i>Planning & Examens
+                    <i class="fa-solid fa-calendar-days mr-1.5"></i>Planning Évaluations
                 </button>
                 <button onclick="switchTab('classement')" id="tabBtnClassement" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white">
                     <i class="fa-solid fa-users mr-1.5"></i>Gestion Classe & Promo
@@ -239,13 +239,62 @@
             </div>
         </section>
 
-        <!-- ONGLET 2 : PLANNING & DÉTECTION ÉVALUATIONS -->
+        <!-- ONGLET 2 : PLANNING & SOUMISSION / MODÉRATION D'ÉVALUATIONS -->
         <section id="secPlanning" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div>
-                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-calendar-days text-icam-red mr-2"></i>Planning & Détection d'Évaluations</h2>
-                <p class="text-xs text-slate-500 mt-1">Importe ton calendrier Google ICAM ou Hyperplanning pour détecter automatiquement tes contrôles et examens.</p>
+                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-calendar-days text-icam-red mr-2"></i>Planning & Évaluations Officielle</h2>
+                <p class="text-xs text-slate-500 mt-1">Propose une date d'évaluation ou de soutenance. Les administrateurs doivent la valider pour qu'elle devienne officielle.</p>
             </div>
 
+            <!-- Formulaire de Proposition (Tous les étudiants) -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                <h3 class="text-xs font-bold text-slate-700 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-plus-circle text-icam-red"></i> Proposer une Évaluation ou Soutenance
+                </h3>
+                <form onsubmit="proposeStudentEvaluation(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                    <div class="sm:col-span-5">
+                        <input type="text" id="propEvalTitle" required placeholder="Ex. Soutenance Pitch Projet / DS MME" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red bg-white">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <input type="date" id="propEvalDate" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red bg-white">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <select id="propEvalComp" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red bg-white">
+                            <option value="">(Compétence)</option>
+                            <option value="C01">C01</option>
+                            <option value="C02">C02</option>
+                            <option value="C03">C03</option>
+                            <option value="C04">C04</option>
+                            <option value="C05">C05</option>
+                            <option value="C06">C06</option>
+                            <option value="C07">C07</option>
+                            <option value="C08">C08</option>
+                            <option value="C09">C09</option>
+                            <option value="C10">C10</option>
+                            <option value="C11">C11</option>
+                            <option value="C12">C12</option>
+                            <option value="C13">C13</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs py-2 rounded-lg transition shadow">
+                            Envoyer <i class="fa-solid fa-paper-plane ml-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- PANNEAU ADMIN : VALIDATION DES PROPOSITIONS EN ATTENTE -->
+            <div id="adminValidationPanel" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl space-y-3">
+                <h3 class="text-xs font-bold text-amber-900 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-amber-600"></i> Propositions d'évaluations en attente de confirmation Admin
+                </h3>
+                <div id="pendingEvalsList" class="space-y-2">
+                    <!-- Rempli en JS -->
+                </div>
+            </div>
+
+            <!-- Import iCal optionnel -->
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-file-arrow-up mr-1.5 text-emerald-600"></i>Importer un fichier `.ics` (Google / Hyperplanning)</h3>
@@ -263,14 +312,14 @@
 
             <div>
                 <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
-                    <span><i class="fa-solid fa-list-check mr-2 text-icam-red"></i>Évaluations & Devoirs à venir</span>
-                    <span id="eventCountBadge" class="bg-red-100 text-icam-red text-xs px-2 py-0.5 rounded-full font-bold">0 événement</span>
+                    <span><i class="fa-solid fa-list-check mr-2 text-icam-red"></i>Évaluations Futures Officiellement Validées</span>
+                    <span id="eventCountBadge" class="bg-red-100 text-icam-red text-xs px-2 py-0.5 rounded-full font-bold">0 évaluation</span>
                 </h3>
 
                 <div id="calendarEventsContainer" class="space-y-3 max-h-96 overflow-y-auto pr-1">
                     <div class="text-center py-8 text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
                         <i class="fa-solid fa-calendar-xmark text-2xl mb-2 text-slate-300"></i>
-                        <p>Aucun événement importé.</p>
+                        <p>Aucune évaluation future validée.</p>
                     </div>
                 </div>
             </div>
@@ -310,10 +359,8 @@
 
     <!-- JS Application -->
     <script>
-        // Liste des adresses email autorisées comme administrateurs
         const ADMIN_EMAILS = [
             "martin.dupont@2031.icam.fr",
-            // "coadmin.exemple@2031.icam.fr",
         ];
 
         const COMPETENCES_DB = {
@@ -336,11 +383,13 @@
         let userScores = {};
         let userValidation = {};
         let importedEvents = [];
+        let adminCustomEvals = [];
         let radarChartInstance = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             loadCompetenceOptions();
             checkExistingSession();
+            loadCustomEvaluations();
         });
 
         function isAdmin() {
@@ -403,8 +452,10 @@
 
             if (isAdmin()) {
                 document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('adminValidationPanel').classList.remove('hidden');
             } else {
                 document.getElementById('adminBadge').classList.add('hidden');
+                document.getElementById('adminValidationPanel').classList.add('hidden');
             }
         }
 
@@ -511,10 +562,7 @@
 
         function openRevisionPdf() {
             const url = document.getElementById('valRevisionPdf').value.trim();
-            if (!url) {
-                alert("Entre d'abord un lien de document PDF ou Google Drive.");
-                return;
-            }
+            if (!url) return alert("Entre d'abord un lien de document PDF ou Google Drive.");
             window.open(url, '_blank');
         }
 
@@ -523,10 +571,7 @@
             const comp = COMPETENCES_DB[compKey];
             const dateVal = document.getElementById('valDate').value;
 
-            if (!dateVal) {
-                alert("Choisis d'abord une date limite de validation.");
-                return;
-            }
+            if (!dateVal) return alert("Choisis d'abord une date limite de validation.");
 
             const formattedDate = dateVal.replace(/-/g, '');
             const title = encodeURIComponent(`Validation ICAM : ${comp.title}`);
@@ -643,16 +688,11 @@
                         `;
                         tbody.appendChild(tr);
                     });
-                })
-                .catch(() => {
-                    tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400">Erreur de chargement.</td></tr>';
                 });
         }
 
         function deleteStudentByAdmin(targetEmail) {
-            if (!confirm(`Confirmer la suppression définitive du compte : ${targetEmail} ?`)) {
-                return;
-            }
+            if (!confirm(`Confirmer la suppression définitive du compte : ${targetEmail} ?`)) return;
 
             fetch('/api/admin/delete-student', {
                 method: 'POST',
@@ -670,8 +710,124 @@
                 } else {
                     alert("Erreur : " + data.message);
                 }
+            });
+        }
+
+        // CHARGEMENT & PROPOSITION D'ÉVALUATIONS AVEC MODÉRATION ADMIN
+        function loadCustomEvaluations() {
+            fetch('/api/evaluations')
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        adminCustomEvals = data;
+                        renderPendingEvalsForAdmin();
+                        renderEventsList();
+                    }
+                });
+        }
+
+        function proposeStudentEvaluation(e) {
+            e.preventDefault();
+            const title = document.getElementById('propEvalTitle').value.trim();
+            const date = document.getElementById('propEvalDate').value;
+            const competence = document.getElementById('propEvalComp').value;
+
+            if (!title || !date) return alert("Précise un titre et une date.");
+
+            fetch('/api/propose-evaluation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    studentEmail: currentUser.email,
+                    title: title,
+                    date: date,
+                    competence: competence
+                })
             })
-            .catch(() => alert("Impossible de supprimer l'élève."));
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('propEvalTitle').value = '';
+                    document.getElementById('propEvalDate').value = '';
+                    loadCustomEvaluations();
+                    alert("Proposition envoyée ! L'évaluation sera officialisée dès la confirmation d'un administrateur.");
+                } else {
+                    alert("Erreur : " + data.message);
+                }
+            });
+        }
+
+        function approveAdminEvaluation(evalId) {
+            fetch('/api/admin/approve-evaluation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    adminEmail: currentUser.email,
+                    evalId: evalId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadCustomEvaluations();
+                } else {
+                    alert("Erreur : " + data.message);
+                }
+            });
+        }
+
+        function deleteAdminEvaluation(evalId) {
+            if (!confirm("Supprimer ou refuser cette évaluation ?")) return;
+
+            fetch('/api/admin/delete-evaluation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    adminEmail: currentUser.email,
+                    evalId: evalId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadCustomEvaluations();
+                } else {
+                    alert("Erreur : " + data.message);
+                }
+            });
+        }
+
+        function renderPendingEvalsForAdmin() {
+            const container = document.getElementById('pendingEvalsList');
+            if (!container || !isAdmin()) return;
+
+            const pendingList = adminCustomEvals.filter(e => e.status === 'pending');
+            container.innerHTML = '';
+
+            if (pendingList.length === 0) {
+                container.innerHTML = '<div class="text-xs text-amber-800 italic">Aucune proposition d\'évaluation en attente.</div>';
+                return;
+            }
+
+            pendingList.forEach(ev => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-2.5 rounded-lg border border-amber-200 flex items-center justify-between text-xs";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-slate-800">${ev.title}</span> ${ev.competence ? `<span class="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-mono text-[10px] ml-1">${ev.competence}</span>` : ''}
+                        <div class="text-[10px] text-slate-500">Proposé par <span class="font-semibold">${ev.proposedBy}</span> pour le <span class="font-semibold">${ev.date}</span></div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="approveAdminEvaluation('${ev.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-2.5 py-1 rounded transition">
+                            <i class="fa-solid fa-check mr-1"></i>Valider
+                        </button>
+                        <button onclick="deleteAdminEvaluation('${ev.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-[11px] font-bold px-2 py-1 rounded transition">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
         }
 
         function importIcalUrl() {
@@ -690,8 +846,7 @@
                 } else {
                     alert("Erreur serveur : " + data.message);
                 }
-            })
-            .catch(() => alert("Erreur de connexion."));
+            });
         }
 
         function importIcsFile(event) {
@@ -709,17 +864,27 @@
             let currentEvent = null;
             importedEvents = [];
 
-            // Mots-clés pour repérer automatiquement les examens et évaluations
-            const evalKeywords = ['eval', 'évaluation', 'evaluation', 'examen', 'ds', 'partiel', 'soutenance', 'contrôle', 'controle', 'qcm', 'tp', 'test'];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const todayFormatted = `${yyyy}${mm}${dd}`;
+
+            const evalKeywords = ['eval', 'évaluation', 'evaluation', 'examen', 'ds', 'partiel', 'soutenance', 'contrôle', 'controle', 'qcm', 'test', 'rendu', 'pitch'];
 
             lines.forEach(line => {
                 if (line.startsWith('BEGIN:VEVENT')) {
                     currentEvent = {};
                 } else if (line.startsWith('END:VEVENT')) {
-                    if (currentEvent && currentEvent.summary) {
+                    if (currentEvent && currentEvent.summary && currentEvent.date) {
                         const titleLower = currentEvent.summary.toLowerCase();
-                        currentEvent.isEval = evalKeywords.some(kw => titleLower.includes(kw));
-                        importedEvents.push(currentEvent);
+                        const isEval = evalKeywords.some(kw => titleLower.includes(kw));
+
+                        if (isEval && currentEvent.date >= todayFormatted) {
+                            currentEvent.isEval = true;
+                            importedEvents.push(currentEvent);
+                        }
                     }
                     currentEvent = null;
                 } else if (currentEvent) {
@@ -727,26 +892,62 @@
                         currentEvent.summary = line.replace('SUMMARY:', '').trim();
                     }
                     if (line.startsWith('DTSTART:')) {
-                        currentEvent.date = line.replace('DTSTART:', '').substring(0, 8);
+                        let dt = line.replace('DTSTART:', '').trim();
+                        if (dt.includes(':')) dt = dt.split(':')[1];
+                        currentEvent.date = dt.substring(0, 8);
                     }
                 }
             });
 
             importedEvents.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
             renderEventsList();
-
-            const evalCount = importedEvents.filter(e => e.isEval).length;
-            alert(`${importedEvents.length} événements importés, dont ${evalCount} évaluation(s) détectée(s) !`);
+            alert(`${importedEvents.length} évaluation(s) détectée(s) dans le fichier !`);
         }
 
         function renderEventsList() {
             const container = document.getElementById('calendarEventsContainer');
+            if (!container) return;
             container.innerHTML = '';
 
-            let list = [...importedEvents];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const todayFormatted = `${yyyy}${mm}${dd}`;
+            const todayDash = `${yyyy}-${mm}-${dd}`;
 
+            let list = [];
+
+            // 1. Évaluations importées d'un fichier .ics
+            importedEvents.forEach(ev => {
+                if (ev.date >= todayFormatted) list.push(ev);
+            });
+
+            // 2. Évaluations de la base de données (seules les "approved" apparaissent publiquement, les "pending" apparaissent avec statut d'attente pour l'auteur)
+            adminCustomEvals.forEach(ce => {
+                if (ce.date >= todayDash) {
+                    if (ce.status === 'approved') {
+                        list.push({
+                            id: ce.id,
+                            summary: ce.title + (ce.competence ? ` [${ce.competence}]` : ''),
+                            date: ce.date.replace(/-/g, ''),
+                            isAdminApproved: true
+                        });
+                    } else if (ce.status === 'pending' && currentUser && ce.proposedBy === currentUser.email) {
+                        list.push({
+                            id: ce.id,
+                            summary: ce.title + (ce.competence ? ` [${ce.competence}]` : ''),
+                            date: ce.date.replace(/-/g, ''),
+                            isMyPendingProposal: true
+                        });
+                    }
+                }
+            });
+
+            // 3. Validations personnelles des étudiants
             Object.keys(userValidation).forEach(key => {
-                if (userValidation[key].date) {
+                if (userValidation[key].date && userValidation[key].date >= todayDash) {
                     list.push({
                         summary: `Validation ${COMPETENCES_DB[key].title}`,
                         date: userValidation[key].date.replace(/-/g, ''),
@@ -755,13 +956,14 @@
                 }
             });
 
+            list.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
             document.getElementById('eventCountBadge').textContent = `${list.length} événement(s)`;
 
             if (list.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
                         <i class="fa-solid fa-calendar-xmark text-2xl mb-2 text-slate-300"></i>
-                        <p>Aucun événement importé.</p>
+                        <p>Aucune évaluation future enregistrée ou validée.</p>
                     </div>`;
                 return;
             }
@@ -769,38 +971,55 @@
             list.forEach(ev => {
                 const formattedDate = ev.date ? `${ev.date.substring(6,8)}/${ev.date.substring(4,6)}/${ev.date.substring(0,4)}` : "Date non précisée";
                 const div = document.createElement('div');
-                
-                let badgeText = "Cours";
-                let badgeClass = "bg-slate-100 text-slate-600";
-                let bgClass = "bg-white border-slate-200";
-                let iconClass = "fa-graduation-cap text-blue-600 bg-blue-100";
+
+                let badgeText = "⚠️ Évaluation détectée";
+                let badgeClass = "bg-red-100 text-red-700 font-bold border border-red-200";
+                let bgClass = "bg-red-50/50 border-red-200";
+                let iconClass = "fa-pen-ruler text-red-600 bg-red-100";
 
                 if (ev.isValidation) {
                     badgeText = "Validation ICAM";
                     badgeClass = "bg-amber-200 text-amber-900 font-bold";
                     bgClass = "bg-amber-50 border-amber-200";
                     iconClass = "fa-award text-amber-800 bg-amber-200";
-                } else if (ev.isEval) {
-                    badgeText = "⚠️ Évaluation détectée";
-                    badgeClass = "bg-red-100 text-red-700 font-bold border border-red-200";
-                    bgClass = "bg-red-50/50 border-red-200";
-                    iconClass = "fa-triangle-exclamation text-red-600 bg-red-100";
+                } else if (ev.isAdminApproved) {
+                    badgeText = "🟢 Validée Admin";
+                    badgeClass = "bg-emerald-100 text-emerald-800 font-bold border border-emerald-200";
+                    bgClass = "bg-emerald-50/50 border-emerald-200";
+                    iconClass = "fa-circle-check text-emerald-600 bg-emerald-100";
+                } else if (ev.isMyPendingProposal) {
+                    badgeText = "⏳ En attente validation admin";
+                    badgeClass = "bg-amber-100 text-amber-800 font-bold border border-amber-200";
+                    bgClass = "bg-amber-50/40 border-amber-200";
+                    iconClass = "fa-hourglass-half text-amber-600 bg-amber-100";
+                }
+
+                let adminDeleteBtn = '';
+                if (ev.isAdminApproved && isAdmin()) {
+                    adminDeleteBtn = `
+                        <button onclick="deleteAdminEvaluation('${ev.id}')" class="ml-2 text-red-600 hover:text-red-800 text-xs font-bold" title="Supprimer l'évaluation">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    `;
                 }
 
                 div.className = `p-3 rounded-xl border flex items-center justify-between text-xs ${bgClass}`;
                 div.innerHTML = `
                     <div class="flex items-center space-x-3">
                         <div class="p-2 rounded-lg ${iconClass}">
-                            <i class="fa-solid ${ev.isValidation ? 'fa-award' : (ev.isEval ? 'fa-pen-ruler' : 'fa-graduation-cap')}"></i>
+                            <i class="fa-solid ${ev.isValidation ? 'fa-award' : (ev.isAdminApproved ? 'fa-circle-check' : (ev.isMyPendingProposal ? 'fa-hourglass-half' : 'fa-pen-ruler'))}"></i>
                         </div>
                         <div>
                             <div class="font-bold text-slate-800">${ev.summary}</div>
                             <div class="text-[10px] text-slate-500"><i class="fa-regular fa-clock mr-1"></i>${formattedDate}</div>
                         </div>
                     </div>
-                    <span class="text-[10px] px-2 py-1 rounded-full ${badgeClass}">
-                        ${badgeText}
-                    </span>
+                    <div class="flex items-center">
+                        <span class="text-[10px] px-2 py-1 rounded-full ${badgeClass}">
+                            ${badgeText}
+                        </span>
+                        ${adminDeleteBtn}
+                    </div>
                 `;
                 container.appendChild(div);
             });
