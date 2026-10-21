@@ -85,6 +85,13 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
 
   <!-- Référentiel -->
   <section id="secReferentiel" class="bg-white rounded-xl border p-4 sm:p-6">
+    <div class="pb-5 mb-5 border-b">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h3 class="text-sm font-bold uppercase text-slate-500">Ma progression par compétence</h3>
+        <span class="text-[11px] text-slate-400">Clique sur une barre pour ouvrir la compétence · trait blanc = objectif 70 %</span>
+      </div>
+      <div id="compBars" class="grid sm:grid-cols-2 gap-x-8 gap-y-4"></div>
+    </div>
     <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b">
       <h2 class="text-xl font-bold">Référentiel C01-C13</h2>
       <div class="flex gap-2">
@@ -103,6 +110,7 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
           <h3 id="compTitle" class="text-lg font-bold"></h3>
           <p id="compDescription" class="text-xs text-slate-500"></p>
         </div>
+        <div id="compBigBar"></div>
         <div id="raListContainer" class="space-y-2"></div>
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
@@ -302,14 +310,14 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const isAdmin = () => currentUser && ADMIN_EMAILS.includes(currentUser.email);
 
 /* ---- Extension PITCH (zip embarqué : aucun fichier à héberger à côté) ---- */
-const EXT_ZIP_B64 = "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";
+const EXT_ZIP_B64 = "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";
 
 function downloadExtension() {
   const bin = atob(EXT_ZIP_B64), bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
   const a = document.createElement('a');
-  a.href = url; a.download = 'pitch-sync-extension-v2.zip';
+  a.href = url; a.download = 'pitch-sync-extension-v2.1.zip';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -321,7 +329,7 @@ function copyText(text, btn) {
 }
 
 const PITCH_INSTALL = [
-  "<b>Télécharge</b> le fichier avec le bouton rouge ci-dessus (<code>pitch-sync-extension-v2.zip</code>).",
+  "<b>Télécharge</b> le fichier avec le bouton rouge ci-dessus (<code>pitch-sync-extension-v2.1.zip</code>).",
   "<b>Décompresse-le</b> : sous Windows, clic droit sur le zip puis « Extraire tout… » ; sous Mac, double-clic. Tu obtiens un dossier <code>pitch-sync-extension</code> contenant 3 fichiers (<code>manifest.json</code>, <code>inject.js</code>, <code>content.js</code>). <b>Range-le à un endroit stable</b> (ex. Documents) : si tu le supprimes ou le déplaces, l'extension s'arrête.",
   "Ouvre la page des extensions : tape <code>chrome://extensions</code> dans la barre d'adresse <button type='button' onclick=\"copyText('chrome://extensions', this)\" class='ml-1 text-[11px] bg-slate-100 hover:bg-slate-200 border px-2 py-0.5 rounded'>Copier</button> <span class='text-slate-500'>(Edge : <code>edge://extensions</code> · Brave : <code>brave://extensions</code>)</span>. Un lien cliquable ne marche pas, c'est une limite du navigateur : copie-colle l'adresse.",
   "Active le <b>« Mode développeur »</b> (interrupteur en haut à droite de la page).",
@@ -344,6 +352,7 @@ const PITCH_TROUBLES = [
   "<b>« Aucun avancement trouvé »</b> : F5, clique sur une compétence (ex. C01), attends que ses RA s'affichent, puis relance la synchro.",
   "<b>Le portail dit « Aucune donnée serveur pour… »</b> : l'email saisi dans l'extension n'est pas le même que celui du portail. Relance la synchro et corrige-le dans la fenêtre qui s'ouvre.",
   "<b>Chrome affiche « Désactiver les extensions en mode développeur »</b> au démarrage : normal pour une extension qui ne vient pas du Chrome Web Store. Ferme le message sans désactiver.",
+  "<b>Il me manque des RA (C03, C04, C10, C11, C13…)</b> : installe l'extension <b>2.1</b> (cette version envoie aussi les RA pas encore évalués), puis relance la synchro. Regarde la ligne « Blocs lus » dans le message final : <code>C04: 0</code> signifie que PITCH lui-même ne renvoie aucun RA pour cette compétence.",
   "<b>Mise à jour de l'extension</b> : remplace les fichiers dans ton dossier, puis clique sur l'icône ↻ de la carte de l'extension dans <code>chrome://extensions</code>.",
   "<b>Mes curseurs ont changé</b> : les scores PITCH écrasent tes réglages manuels à chaque synchro. Pour les RA que PITCH n'évalue pas encore, tes valeurs manuelles sont conservées."
 ];
@@ -382,6 +391,65 @@ function renderGuides() {
   $('pitchTroubles').innerHTML = PITCH_TROUBLES.map(t => '<li>' + t + '</li>').join('');
   $('agendaTroubles').innerHTML = AGENDA_TROUBLES.map(t => '<li>' + t + '</li>').join('');
 }
+
+/* ---- RA dynamiques : liste codée en dur + tous les RA reçus de PITCH ---- */
+// Valeur -1 = RA connu de PITCH mais pas encore évalué
+const isEvaluated = ra => userScores[ra] !== undefined && Number(userScores[ra]) >= 0;
+
+function getRAs(key) {
+  const set = new Set(COMPETENCES_DB[key].ras);
+  Object.keys(userScores).forEach(k => {
+    const u = k.toUpperCase();
+    if (u.startsWith('RA-') && u.includes('-' + key + '-')) set.add(u);
+  });
+  return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr', { numeric: true }));
+}
+
+function compStats(key) {
+  const ras = getRAs(key), ev = ras.filter(isEvaluated);
+  const avg = ev.length ? ev.reduce((s, r) => s + Number(userScores[r]), 0) / ev.length : null;
+  return { avg, done: ev.length, total: ras.length };
+}
+
+const barColor = v => v === null ? 'bg-slate-300' : v >= 70 ? 'bg-emerald-500' : v >= 40 ? 'bg-amber-500' : 'bg-icam-red';
+
+function barHtml(st, h, big) {
+  const pct = st.avg === null ? 0 : Math.round(st.avg);
+  const label = st.avg === null ? '—' : pct + '%';
+  return `<div class="relative ${h} bg-slate-200 rounded-full overflow-hidden">
+      <div class="h-full rounded-full ${barColor(st.avg)} transition-all duration-500" style="width:${pct}%"></div>
+      <div class="absolute top-0 bottom-0 w-0.5 bg-white/90" style="left:70%"></div>
+      ${big ? `<span class="absolute inset-0 flex items-center justify-center text-sm font-black ${pct > 45 ? 'text-white' : 'text-slate-700'}">${label}</span>` : ''}
+    </div>`;
+}
+
+function renderCompBars() {
+  const cur = $('competenceSelect').value;
+  $('compBars').innerHTML = Object.keys(COMPETENCES_DB).map(k => {
+    const st = compStats(k), pct = st.avg === null ? '—' : Math.round(st.avg) + '%';
+    const short = COMPETENCES_DB[k].title.replace(/^C\d+\s*:\s*/, '');
+    return `<button type="button" onclick="selectComp('${k}')" class="text-left rounded-xl p-2 -m-2 hover:bg-slate-50 ${k === cur ? 'ring-2 ring-red-300 bg-red-50/40' : ''}">
+      <div class="flex items-baseline justify-between gap-2 mb-1">
+        <span class="text-xs font-bold truncate"><span class="text-icam-red">${k}</span> <span class="font-normal text-slate-500">${esc(short)}</span></span>
+        <span class="text-base font-black shrink-0">${pct}</span>
+      </div>
+      ${barHtml(st, 'h-5', false)}
+      <div class="text-[10px] text-slate-400 mt-0.5">${st.done} / ${st.total} RA évalués</div>
+    </button>`;
+  }).join('');
+}
+
+function renderBigBar(key) {
+  const st = compStats(key);
+  $('compBigBar').innerHTML = `<div class="flex justify-between text-[11px] text-slate-500 mb-1"><span>Progression de la compétence</span><span>${st.done} / ${st.total} RA évalués</span></div>` + barHtml(st, 'h-8', true);
+}
+
+function selectComp(k) {
+  $('competenceSelect').value = k;
+  renderCompetenceDetails();
+  $('compTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function goToAgendaGuide() {
   switchTab('Sync');
   $('guideAgenda').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -455,11 +523,15 @@ async function refreshFromServer(silent) {
     const db = await res.json();
     const me = db[currentUser.email];
     if (me) {
-      if (me.scores) userScores = { ...userScores, ...me.scores };
+      if (me.scores) Object.keys(me.scores).forEach(k => {
+        const v = Number(me.scores[k]);
+        if (v < 0 && isEvaluated(k)) return; // PITCH n'a rien : on garde la saisie manuelle
+        userScores[k] = v;
+      });
       if (me.validation) userValidation = { ...me.validation, ...userValidation };
       $('syncDebug').textContent = JSON.stringify(me.scores || {}, null, 2);
       $('syncStatus').textContent = 'Dernière lecture serveur : ' + new Date().toLocaleTimeString() +
-        ' — ' + Object.keys(me.scores || {}).length + ' RA reçus.';
+        ' — ' + Object.keys(me.scores || {}).length + ' RA reçus (' + Object.values(me.scores || {}).filter(v => Number(v) >= 0).length + ' évalués).';
     } else {
       $('syncStatus').textContent = 'Aucune donnée serveur pour ' + currentUser.email +
         ". Vérifie que l'email saisi dans l'extension est exactement le même.";
@@ -472,7 +544,7 @@ async function refreshFromServer(silent) {
   renderCompetenceDetails();
   updateGlobalStats();
   renderEventsList();
-  if (!silent) alert('Scores rafraîchis : ' + Object.keys(userScores).length + ' RA.');
+  if (!silent) alert('Scores rafraîchis : ' + Object.keys(userScores).filter(isEvaluated).length + ' RA évalués, ' + Object.keys(userScores).length + ' RA connus.');
 }
 
 // Sauvegarde seulement quand l'utilisateur modifie quelque chose
@@ -495,15 +567,16 @@ function renderCompetenceDetails() {
   $('compTitle').textContent = comp.title;
   $('compDescription').textContent = comp.desc;
   const box = $('raListContainer');
-  box.innerHTML = comp.ras.length ? '' : '<p class="text-xs text-slate-400 italic">Aucun RA listé pour cette compétence.</p>';
-  comp.ras.forEach(ra => {
-    const score = userScores[ra] !== undefined ? Math.round(userScores[ra]) : 0;
+  const ras = getRAs(key);
+  box.innerHTML = ras.length ? '' : '<p class="text-xs text-slate-400 italic">Aucun RA connu pour cette compétence. Relance la synchro PITCH (extension 2.1) : ses RA seront ajoutés automatiquement.</p>';
+  ras.forEach(ra => {
+    const ev = isEvaluated(ra), score = ev ? Math.round(userScores[ra]) : 0;
     const d = document.createElement('div');
     d.className = 'bg-white p-2.5 rounded-lg border flex items-center justify-between';
     d.innerHTML = `<span class="font-mono text-xs font-bold">${esc(ra)}</span>
       <div class="flex items-center gap-3">
         <input type="range" min="0" max="100" step="5" value="${score}" oninput="updateRaScore('${esc(ra)}', this.value)" class="w-28 accent-red-600">
-        <span class="text-xs font-bold w-10 text-right" id="val_${esc(ra)}">${score}%</span>
+        <span class="text-xs font-bold w-16 text-right ${ev ? '' : 'text-slate-400 font-normal'}" id="val_${esc(ra)}">${ev ? score + '%' : 'non évalué'}</span>
       </div>`;
     box.appendChild(d);
   });
@@ -514,13 +587,17 @@ function renderCompetenceDetails() {
   $('valProof').value = vd.proof || '';
   $('valRevisionPdf').value = vd.revisionPdf || '';
   renderRadar(key);
+  renderBigBar(key);
+  renderCompBars();
 }
 
 function updateRaScore(ra, value) {
   userScores[ra] = parseInt(value);
-  $('val_' + ra).textContent = value + '%';
+  const sp = $('val_' + ra); sp.textContent = value + '%'; sp.className = 'text-xs font-bold w-16 text-right';
   saveUserData();
   renderRadar($('competenceSelect').value);
+  renderBigBar($('competenceSelect').value);
+  renderCompBars();
 }
 
 function updateValidationDetails() {
@@ -548,8 +625,8 @@ function syncCurrentCompToGoogleCalendar() {
 }
 
 function renderRadar(key) {
-  const labels = COMPETENCES_DB[key].ras;
-  const data = labels.map(ra => userScores[ra] !== undefined ? userScores[ra] : 0);
+  const labels = getRAs(key);
+  const data = labels.map(ra => isEvaluated(ra) ? Number(userScores[ra]) : 0);
   if (radarChart) radarChart.destroy();
   if (!labels.length) return;
   radarChart = new Chart($('competenceRadarChart').getContext('2d'), {
@@ -560,14 +637,17 @@ function renderRadar(key) {
 }
 
 function updateGlobalStats() {
-  const keys = Object.keys(userScores);
+  const keys = Object.keys(userScores).filter(isEvaluated);
   $('raCount').textContent = keys.length;
+  const b = $('targetBadge70');
   if (keys.length) {
-    const avg = Math.round(keys.reduce((s, k) => s + Number(userScores[k]), 0) / keys.length);
+    const avg = Math.round(keys.reduce((t, k) => t + Number(userScores[k]), 0) / keys.length);
     $('userOverallScore').textContent = avg + '%';
-    const b = $('targetBadge70');
     b.textContent = avg >= 70 ? '🟢 Au-dessus de 70%' : '🔴 Sous 70%';
     b.className = 'text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block ' + (avg >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800');
+  } else {
+    $('userOverallScore').textContent = '0%';
+    b.textContent = '—'; b.className = 'text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-slate-100';
   }
   const n = Object.values(userValidation).filter(v => v.status === 'Validé').length;
   $('validatedCount').textContent = n + ' / 13';
@@ -582,7 +662,7 @@ function renderClassTable() {
     $('totalStudentsCount').textContent = emails.length || 1;
     if (!emails.length) { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Aucun élève.</td></tr>'; return; }
     emails.forEach(e => {
-      const st = db[e], sc = st.scores || {}, k = Object.keys(sc);
+      const st = db[e], sc = st.scores || {}, k = Object.keys(sc).filter(x => Number(sc[x]) >= 0);
       const avg = k.length ? Math.round(k.reduce((s, x) => s + Number(sc[x]), 0) / k.length) : 0;
       const val = Object.values(st.validation || {}).filter(v => v.status === 'Validé').length;
       const me = currentUser && currentUser.email === st.email;
@@ -610,7 +690,7 @@ function renderPropRACheckboxes() {
   if (!c) { area.classList.add('hidden'); return; }
   area.classList.remove('hidden');
   area.innerHTML = '';
-  COMPETENCES_DB[c].ras.forEach(ra => {
+  getRAs(c).forEach(ra => {
     const l = document.createElement('label');
     l.className = 'flex items-center gap-2 bg-white px-2 py-1 rounded border cursor-pointer';
     l.innerHTML = `<input type="checkbox" ${selectedPropRAs.has(ra) ? 'checked' : ''} onchange="togglePropRA('${esc(ra)}', this.checked)"><span class="font-mono text-xs">${esc(ra)}</span>`;
