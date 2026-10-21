@@ -35,7 +35,7 @@ def presentation():
         <li>Les jeux vidéo</li>
         <li>La musique</li>
         <li>Le sport (bientôt !)</li>
-        <img src="https://www.europosters.fr/view-to-jerusalem-old-city-israel-f73191393" width="100">
+        <img src="CAMSUxoyKhBlLS1RWnFkTnAtTWl0NkpNMg4tUVpxZE5wLU1pdDZKTToOMG9uM2ZzLUJlMS1RS00gBCoXCgFzEhBlLS1RWnFkTnAtTWl0NkpNGAEwAVACGAcgud2GkwhKCBACGAEgAigB" width="100">
     </ul>
     """
 
