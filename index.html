@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICAM - Suivi des Compétences & Planning</title>
+    <title>ICAM - Suivi des Compétences & Administration</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -37,7 +37,7 @@
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-800">Portail ICAM</h2>
-                <p class="text-xs text-slate-500 mt-1">Connexion unique avec ton adresse email ICAM</p>
+                <p class="text-xs text-slate-500 mt-1">Connexion sécurisée avec ton adresse email ICAM</p>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
@@ -65,14 +65,14 @@
         </div>
     </div>
 
-    <!-- Navigation -->
+    <!-- Barre de Navigation -->
     <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
                 <div class="bg-icam-red text-white px-3 py-1.5 rounded-lg font-black text-xl tracking-wider">ICAM</div>
                 <div>
-                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Hub Révision</h1>
-                    <p class="text-xs text-slate-400">Google Drive • PDF • Hyperplanning</p>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Administration</h1>
+                    <p class="text-xs text-slate-400">Google Drive • PDF • Planning</p>
                 </div>
             </div>
 
@@ -84,13 +84,16 @@
                     <i class="fa-solid fa-calendar-days mr-1.5"></i>Planning & Examens
                 </button>
                 <button onclick="switchTab('classement')" id="tabBtnClassement" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white">
-                    <i class="fa-solid fa-users mr-1.5"></i>Classement Promo
+                    <i class="fa-solid fa-users mr-1.5"></i>Gestion Classe & Promo
                 </button>
             </nav>
 
             <div class="flex items-center space-x-3">
                 <div id="userInfo" class="hidden text-right">
-                    <div id="displayUserName" class="text-xs font-bold text-white"></div>
+                    <div class="flex items-center justify-end gap-1.5">
+                        <span id="adminBadge" class="hidden text-[10px] bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Admin</span>
+                        <span id="displayUserName" class="text-xs font-bold text-white"></span>
+                    </div>
                     <div id="displayUserEmail" class="text-[10px] text-slate-400"></div>
                 </div>
                 <button onclick="logout()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 transition">
@@ -273,12 +276,12 @@
             </div>
         </section>
 
-        <!-- ONGLET 3 : CLASSEMENT -->
+        <!-- ONGLET 3 : CLASSEMENT ET GESTION ADMIN -->
         <section id="secClassement" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-800">Avancement Général de la Promotion</h3>
-                    <p class="text-xs text-slate-500">Unicité stricte : 1 adresse email = 1 seul élève.</p>
+                    <h3 class="text-lg font-bold text-slate-800">Gestion de la Promotion</h3>
+                    <p class="text-xs text-slate-500">Liste des élèves inscrits et options de modération.</p>
                 </div>
                 <button onclick="renderClassTable()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition font-semibold">
                     <i class="fa-solid fa-rotate-right mr-1"></i>Actualiser
@@ -294,6 +297,7 @@
                             <th class="py-3 px-4">Promotion</th>
                             <th class="py-3 px-4">Moyenne C01-C13</th>
                             <th class="py-3 px-4">Compétences Validées</th>
+                            <th class="py-3 px-4 text-right">Action Admin</th>
                         </tr>
                     </thead>
                     <tbody id="classTableBody" class="divide-y divide-slate-100">
@@ -306,6 +310,9 @@
 
     <!-- JS Application -->
     <script>
+        // Adresses email autorisées comme administrateurs
+        const ADMIN_EMAILS = ["martin.dupont@2026.icam.fr", "martin.dupont@icam.fr"];
+
         const COMPETENCES_DB = {
             "C01": { title: "C01 : Acquérir et mémoriser des connaissances", desc: "Acquérir, structurer et restituer les bases scientifiques et techniques.", ras: ["RA-EEE-C01-1", "RA-ESE-C01-1", "RA-HUM-C01-1", "RA-MIA-C01-1", "RA-MME-C01-1"] },
             "C02": { title: "C02 : Organiser ses connaissances théoriques et expérimentales", desc: "Relier la théorie à la pratique dans des TP ou projets d'ingénierie.", ras: ["RA-EEE-C02-1", "RA-ESE-C02-1", "RA-ICT-C02-1", "RA-MME-C02-1", "RA-PROJET-C02-1"] },
@@ -333,6 +340,10 @@
             checkExistingSession();
         });
 
+        function isAdmin() {
+            return currentUser && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+        }
+
         function switchTab(tab) {
             ['referentiel', 'planning', 'classement'].forEach(t => {
                 document.getElementById(`sec${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
@@ -350,7 +361,7 @@
             const saved = localStorage.getItem('icam_user_session');
             if (saved) {
                 currentUser = JSON.parse(saved);
-                currentUser.email = currentUser.email.trim().toLowerCase(); // Normalisation
+                currentUser.email = currentUser.email.trim().toLowerCase();
                 loadUserData();
                 document.getElementById('authModal').classList.add('hidden');
                 updateUserHeader();
@@ -360,7 +371,7 @@
         function handleLogin(e) {
             e.preventDefault();
             const name = document.getElementById('userNameInput').value.trim();
-            const email = document.getElementById('userEmailInput').value.trim().toLowerCase(); // Strictement minuscules
+            const email = document.getElementById('userEmailInput').value.trim().toLowerCase();
             const promo = document.getElementById('userPromoInput').value;
 
             const icamRegex = /@(\d{4}\.)?(student\.)?icam\.fr$/i;
@@ -386,6 +397,12 @@
             document.getElementById('userInfo').classList.remove('hidden');
             document.getElementById('displayUserName').textContent = currentUser.name;
             document.getElementById('displayUserEmail').textContent = currentUser.email;
+
+            if (isAdmin()) {
+                document.getElementById('adminBadge').classList.remove('hidden');
+            } else {
+                document.getElementById('adminBadge').classList.add('hidden');
+            }
         }
 
         function loadUserData() {
@@ -569,7 +586,7 @@
 
         function renderClassTable() {
             const tbody = document.getElementById('classTableBody');
-            tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Chargement...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400">Chargement...</td></tr>';
 
             fetch('/api/students')
                 .then(res => res.json())
@@ -579,7 +596,7 @@
                     document.getElementById('totalStudentsCount').textContent = emails.length || 1;
 
                     if (emails.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Aucun élève enregistré.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400">Aucun élève enregistré.</td></tr>';
                         return;
                     }
 
@@ -600,6 +617,16 @@
                         const tr = document.createElement('tr');
                         const isMe = currentUser && currentUser.email === st.email;
                         tr.className = isMe ? "bg-emerald-50/60 font-semibold" : "hover:bg-slate-50";
+                        
+                        let actionCell = '<span class="text-slate-400 text-[10px]">—</span>';
+                        if (isAdmin()) {
+                            actionCell = `
+                                <button onclick="deleteStudentByAdmin('${st.email}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2 py-1 rounded text-[11px] font-bold transition flex items-center gap-1 ml-auto">
+                                    <i class="fa-solid fa-trash-can"></i> Supprimer
+                                </button>
+                            `;
+                        }
+
                         tr.innerHTML = `
                             <td class="py-3 px-4 flex items-center gap-2">
                                 <i class="fa-solid fa-circle-user ${isMe ? 'text-emerald-600' : 'text-slate-400'} text-base"></i>
@@ -609,13 +636,39 @@
                             <td class="py-3 px-4 text-slate-500">${st.promo || 'ICAM'}</td>
                             <td class="py-3 px-4 font-bold ${isMe ? 'text-emerald-700' : 'text-icam-red'}">${avg}%</td>
                             <td class="py-3 px-4">${valCount} / 13</td>
+                            <td class="py-3 px-4 text-right">${actionCell}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 })
                 .catch(() => {
-                    tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Erreur de chargement.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-slate-400">Erreur de chargement.</td></tr>';
                 });
+        }
+
+        function deleteStudentByAdmin(targetEmail) {
+            if (!confirm(`Confirmer la suppression définitive du compte : ${targetEmail} ?`)) {
+                return;
+            }
+
+            fetch('/api/admin/delete-student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    adminEmail: currentUser.email,
+                    targetEmail: targetEmail
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    renderClassTable();
+                } else {
+                    alert("Erreur : " + data.message);
+                }
+            })
+            .catch(() => alert("Impossible de supprimer l'élève."));
         }
 
         function importIcalUrl() {
