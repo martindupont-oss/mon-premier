@@ -27,7 +27,7 @@ def accueil():
 
 @app.get("/presentation")
 def presentation():
-    return "Je m'appelle Léa et je suis étudiante en informatique."
+    return "Je m'appelle Martin et je suis étudiante en informatique."
 
 
 # ---------------------------------------------------------------
