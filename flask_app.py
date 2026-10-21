@@ -10,7 +10,7 @@ DATA_FILE = "students_data.json"
 # Adresses autorisées comme administrateurs (ajoute tes co-admins dans cette liste)
 ADMIN_EMAILS = [
     "martin.dupont@2031.icam.fr",
-    "coadmin.exemple@2031.icam.fr",  # <--- Remplace ou ajoute d'autres emails ici
+    # "coadmin.exemple@2031.icam.fr",
 ]
 
 
