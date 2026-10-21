@@ -35,7 +35,7 @@ def presentation():
         <li>Les jeux vidéo</li>
         <li>La musique</li>
         <li>Le sport (bientôt !)</li>
-        <img src="https://fr.wikipedia.org/wiki/Paris_Saint-Germain_Football_Club#/media/Fichier:Logo_Paris_Saint-Germain_2024.svg">
+        <img src="https://thumb.wikimedia.org/wikipedia/fr/thumb/f/ff/Logo_Paris_Saint-Germain_2024.svg/langfr-960px-Logo_Paris_Saint-Germain_2024.svg.png?utm_source=fr.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail">
     </ul>
     """
 
