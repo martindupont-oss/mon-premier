@@ -7,9 +7,11 @@ from flask import Flask, jsonify, request, send_from_directory
 app = Flask(__name__)
 DATA_FILE = "students_data.json"
 
+# Liste des adresses autorisées à administrer et supprimer des comptes
+ADMIN_EMAILS = ["martin.dupont@2026.icam.fr", "martin.dupont@icam.fr"]
+
 
 def get_all_data():
-    """Charge et nettoie les données pour éviter tout doublon d'email."""
     if not os.path.exists(DATA_FILE):
         return {}
     with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -18,7 +20,6 @@ def get_all_data():
             cleaned_db = {}
             for k, v in raw_db.items():
                 clean_email = k.strip().lower()
-                # En cas de doublon, on conserve la mise à jour la plus récente
                 if clean_email in cleaned_db:
                     old_date = cleaned_db[clean_email].get("updatedAt", "")
                     new_date = v.get("updatedAt", "")
@@ -50,9 +51,9 @@ def save_student():
     if not email:
         return jsonify({"status": "error", "message": "Email manquant"}), 400
 
-    payload["email"] = email  # Normalisation de l'email
+    payload["email"] = email
     db = get_all_data()
-    db[email] = payload  # Écrasement/mise à jour de l'élève unique
+    db[email] = payload
     save_all_data(db)
     return jsonify({"status": "success", "message": "Sauvegardé avec succès"})
 
@@ -60,6 +61,33 @@ def save_student():
 @app.route("/api/students", methods=["GET"])
 def get_students():
     return jsonify(get_all_data())
+
+
+# Route d'administration pour supprimer un élève
+@app.route("/api/admin/delete-student", methods=["POST"])
+def delete_student():
+    payload = request.get_json() or {}
+    admin_email = payload.get("adminEmail", "").strip().lower()
+    target_email = payload.get("targetEmail", "").strip().lower()
+
+    if admin_email not in ADMIN_EMAILS:
+        return (
+            jsonify({
+                "status": "error",
+                "message": "Accès refusé : vous n'êtes pas administrateur.",
+            }),
+            403,
+        )
+
+    db = get_all_data()
+    if target_email in db:
+        del db[target_email]
+        save_all_data(db)
+        return jsonify({
+            "status": "success",
+            "message": f"Compte {target_email} supprimé.",
+        })
+    return jsonify({"status": "error", "message": "Élève introuvable."}), 404
 
 
 @app.route("/api/fetch-ical", methods=["POST"])
