@@ -1,5 +1,6 @@
 import json
 import os
+import urllib.request
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__)
@@ -27,7 +28,6 @@ def home():
     return send_from_directory(".", "index.html")
 
 
-# Route pour enregistrer la progression d'un élève
 @app.route("/api/save", methods=["POST"])
 def save_student():
     payload = request.get_json()
@@ -41,10 +41,33 @@ def save_student():
     return jsonify({"status": "success", "message": "Sauvegardé avec succès"})
 
 
-# Route pour charger les données de tous les élèves
 @app.route("/api/students", methods=["GET"])
 def get_students():
     return jsonify(get_all_data())
+
+
+# Proxy iCal pour contourner les blocages CORS (Hyperplanning, Pronote, Apple)
+@app.route("/api/fetch-ical", methods=["POST"])
+def fetch_ical():
+    data = request.get_json()
+    url = data.get("url", "").strip()
+
+    if not url:
+        return jsonify({"status": "error", "message": "URL manquante"}), 400
+
+    # Conversion automatique de webcal:// en https://
+    if url.startswith("webcal://"):
+        url = "https://" + url[9:]
+
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "Mozilla/5.0"}
+        )
+        with urllib.request.urlopen(req, timeout=12) as response:
+            content = response.read().decode("utf-8", errors="ignore")
+        return jsonify({"status": "success", "content": content})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 if __name__ == "__main__":
