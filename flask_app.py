@@ -170,37 +170,6 @@ def approve_evaluation():
     return jsonify({"status": "error", "message": "Évaluation introuvable."}), 404
 
 
-# Ajouter directement une évaluation (Admin uniquement)
-@app.route("/api/admin/add-evaluation", methods=["POST"])
-def add_evaluation():
-    payload = request.get_json() or {}
-    admin_email = payload.get("adminEmail", "").strip().lower()
-
-    if admin_email not in ADMIN_EMAILS:
-        return jsonify({"status": "error", "message": "Accès refusé."}), 403
-
-    title = payload.get("title", "").strip()
-    date_str = payload.get("date", "").strip()
-    comp = payload.get("competence", "").strip()
-
-    if not title or not date_str:
-        return jsonify({"status": "error", "message": "Titre et date requis"}), 400
-
-    evals = get_custom_evals()
-    new_eval = {
-        "id": str(uuid.uuid4())[:8],
-        "title": title,
-        "date": date_str,
-        "competence": comp,
-        "proposedBy": admin_email,
-        "status": "approved",  # Directement approuvée
-    }
-    evals.append(new_eval)
-    save_custom_evals(evals)
-
-    return jsonify({"status": "success", "message": "Évaluation ajoutée", "eval": new_eval})
-
-
 # Supprimer une évaluation (Admin uniquement)
 @app.route("/api/admin/delete-evaluation", methods=["POST"])
 def delete_evaluation():
@@ -218,6 +187,7 @@ def delete_evaluation():
     return jsonify({"status": "success", "message": "Évaluation supprimée"})
 
 
+# Proxy ICAM pour contourner CORS
 @app.route("/api/fetch-ical", methods=["POST"])
 def fetch_ical():
     data = request.get_json() or {}
