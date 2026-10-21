@@ -1,5 +1,6 @@
 import json
 import os
+import urllib.parse
 import urllib.request
 from flask import Flask, jsonify, request, send_from_directory
 
@@ -46,7 +47,7 @@ def get_students():
     return jsonify(get_all_data())
 
 
-# Proxy iCal pour contourner les blocages CORS (Hyperplanning, Pronote, Apple)
+# Proxy iCal sécurisé avec encodage des caractères spéciaux
 @app.route("/api/fetch-ical", methods=["POST"])
 def fetch_ical():
     data = request.get_json()
@@ -55,13 +56,29 @@ def fetch_ical():
     if not url:
         return jsonify({"status": "error", "message": "URL manquante"}), 400
 
-    # Conversion automatique de webcal:// en https://
+    # 1. Correction des caractères issus du copier-coller (&param -> ¶m)
+    url = url.replace("¶m=", "&param=")
+    url = url.replace("¶", "&para")
+
+    # 2. Conversion webcal
     if url.startswith("webcal://"):
         url = "https://" + url[9:]
 
     try:
+        # 3. Encodage propre des caractères non-ASCII de l'URL
+        parsed_url = urllib.parse.urlsplit(url)
+        encoded_path = urllib.parse.quote(parsed_url.path)
+        encoded_query = urllib.parse.quote(parsed_url.query, safe="=&?%")
+        clean_url = urllib.parse.urlunsplit((
+            parsed_url.scheme,
+            parsed_url.netloc,
+            encoded_path,
+            encoded_query,
+            parsed_url.fragment,
+        ))
+
         req = urllib.request.Request(
-            url, headers={"User-Agent": "Mozilla/5.0"}
+            clean_url, headers={"User-Agent": "Mozilla/5.0"}
         )
         with urllib.request.urlopen(req, timeout=12) as response:
             content = response.read().decode("utf-8", errors="ignore")
