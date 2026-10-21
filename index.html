@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICAM - Suivi des Compétences & Validation Évaluations</title>
+    <title>ICAM - Suivi Compétences & Synchro PITCH</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -17,6 +17,7 @@
                     colors: {
                         icam: {
                             red: '#E30613',
+                            orange: '#F39200',
                             dark: '#1E293B',
                             gray: '#F8FAFC',
                             accent: '#2563EB'
@@ -36,7 +37,7 @@
                 <div class="w-16 h-16 bg-red-100 text-icam-red rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">
                     <i class="fa-solid fa-graduation-cap"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">Portail ICAM</h2>
+                <h2 class="text-2xl font-bold text-slate-800">Portail ICAM PITCH+</h2>
                 <p class="text-xs text-slate-500 mt-1">Connexion sécurisée avec ton adresse email ICAM</p>
             </div>
 
@@ -71,8 +72,8 @@
             <div class="flex items-center space-x-3">
                 <div class="bg-icam-red text-white px-3 py-1.5 rounded-lg font-black text-xl tracking-wider">ICAM</div>
                 <div>
-                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Planning</h1>
-                    <p class="text-xs text-slate-400">Google Calendar • PDF • Hyperplanning</p>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Trajectoire PITCH</h1>
+                    <p class="text-xs text-slate-400">PITCH • Hyperplanning ICAM</p>
                 </div>
             </div>
 
@@ -80,11 +81,14 @@
                 <button onclick="switchTab('referentiel')" id="tabBtnReferentiel" class="px-3 py-1.5 rounded-lg font-medium transition bg-icam-red text-white">
                     <i class="fa-solid fa-chart-radar mr-1.5"></i>Référentiel C01-C13
                 </button>
+                <button onclick="switchTab('syncPitch')" id="tabBtnSyncPitch" class="px-3 py-1.5 rounded-lg font-medium transition text-amber-400 hover:text-white">
+                    <i class="fa-solid fa-rotate mr-1.5"></i>Synchro PITCH 1-Clic
+                </button>
                 <button onclick="switchTab('planning')" id="tabBtnPlanning" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white">
                     <i class="fa-solid fa-calendar-days mr-1.5"></i>Planning Évaluations
                 </button>
                 <button onclick="switchTab('classement')" id="tabBtnClassement" class="px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white">
-                    <i class="fa-solid fa-users mr-1.5"></i>Gestion Classe & Promo
+                    <i class="fa-solid fa-users mr-1.5"></i>Gestion Promo
                 </button>
             </nav>
 
@@ -106,15 +110,28 @@
     <!-- Contenu Principal -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
-        <!-- Statistiques -->
+        <!-- Tableau de bord : Trajectoire 70% -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-500 font-medium">Trajectoire 70% PITCH</div>
+                    <div class="text-2xl font-bold text-slate-800" id="userOverallScore">0%</div>
+                    <div id="targetBadge70" class="text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-slate-100 text-slate-600">
+                        Calcul en cours...
+                    </div>
+                </div>
+                <div class="w-12 h-12 rounded-full border-4 border-slate-200 flex items-center justify-center font-bold text-xs" id="targetCircle70">
+                    70%
+                </div>
+            </div>
+
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                <div class="p-3 bg-red-100 text-icam-red rounded-lg text-xl">
-                    <i class="fa-solid fa-chart-pie"></i>
+                <div class="p-3 bg-amber-100 text-amber-600 rounded-lg text-xl">
+                    <i class="fa-solid fa-bullseye"></i>
                 </div>
                 <div>
-                    <div class="text-xs text-slate-500 font-medium">Moyenne Personnelle</div>
-                    <div class="text-2xl font-bold text-slate-800" id="userOverallScore">0%</div>
+                    <div class="text-xs text-slate-500 font-medium">Prochaine chance (RA)</div>
+                    <div class="text-sm font-bold text-slate-800" id="nextDeadlineText">Aucune séance décelée</div>
                 </div>
             </div>
 
@@ -129,16 +146,6 @@
             </div>
 
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                <div class="p-3 bg-amber-100 text-amber-600 rounded-lg text-xl">
-                    <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <div>
-                    <div class="text-xs text-slate-500 font-medium">Prochaine Échéance</div>
-                    <div class="text-sm font-bold text-slate-800" id="nextDeadlineText">Aucune définie</div>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
                 <div class="p-3 bg-emerald-100 text-emerald-600 rounded-lg text-xl">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
@@ -149,12 +156,44 @@
             </div>
         </div>
 
+        <!-- ONGLET : SYNCHRO AUTOMATIQUE PITCH (NOUVEAU) -->
+        <section id="secSyncPitch" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-rotate text-amber-500 mr-2"></i>Synchroniser automatiquement tes compétences PITCH</h2>
+                <p class="text-xs text-slate-500 mt-1">Importe l'intégralité de tes résultats d'apprentissage (RA) depuis PITCH sans rien saisir à la main.</p>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 p-5 rounded-xl space-y-4">
+                <h3 class="font-bold text-sm text-amber-900 flex items-center gap-2">
+                    <span class="bg-amber-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> 
+                    Méthode Rapide : Le Script Console PITCH (10 secondes)
+                </h3>
+                
+                <ol class="list-decimal list-inside text-xs text-slate-700 space-y-2 leading-relaxed">
+                    <li>Connecte-toi sur ton compte PITCH : <a href="https://pitch-icam.rima1.fr" target="_blank" class="text-blue-600 underline font-semibold">pitch-icam.rima1.fr</a></li>
+                    <li>Ouvre la console de ton navigateur (Appuie sur <kbd class="bg-slate-200 px-1.5 py-0.5 rounded text-[10px] font-mono">F12</kbd> puis clique sur l'onglet <strong>Console</strong>).</li>
+                    <li>Copie-colle le code ci-dessous dans la console et appuie sur <kbd class="bg-slate-200 px-1.5 py-0.5 rounded text-[10px] font-mono">Entrée</kbd> :</li>
+                </ol>
+
+                <div class="relative">
+                    <textarea id="pitchSyncScriptCode" readonly class="w-full bg-slate-900 text-emerald-400 font-mono text-[11px] p-3 rounded-lg border border-slate-800 outline-none h-28 cursor-pointer select-all" onclick="this.select()"></textarea>
+                    <button onclick="copyPitchScript()" class="absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-2.5 py-1 rounded font-bold shadow">
+                        <i class="fa-solid fa-copy mr-1"></i>Copier
+                    </button>
+                </div>
+
+                <div class="text-[11px] text-amber-800 italic">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Ce script va extraire tes notes PITCH et les envoyer de manière sécurisée vers ton profil sur cette application.
+                </div>
+            </div>
+        </section>
+
         <!-- ONGLET 1 : RÉFÉRENTIEL -->
         <section id="secReferentiel" class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-800">Référentiel de Compétences</h2>
-                    <p class="text-xs text-slate-500">Mets à jour tes scores, associe tes fiches PDF et planifie tes validations.</p>
+                    <h2 class="text-xl font-bold text-slate-800">Référentiel de Compétences C01-C13</h2>
+                    <p class="text-xs text-slate-500">Visualise et modifie tes scores de résultats d'apprentissage (RA).</p>
                 </div>
                 <div>
                     <select id="competenceSelect" onchange="renderCompetenceDetails()" class="bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-sm rounded-lg p-2.5 focus:ring-2 focus:ring-icam-red outline-none">
@@ -239,14 +278,14 @@
             </div>
         </section>
 
-        <!-- ONGLET 2 : PLANNING & SOUMISSION / MODÉRATION D'ÉVALUATIONS -->
+        <!-- ONGLET 2 : PLANNING -->
         <section id="secPlanning" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div>
                 <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-calendar-days text-icam-red mr-2"></i>Planning & Évaluations Officielles</h2>
                 <p class="text-xs text-slate-500 mt-1">Propose une date d'évaluation ou de soutenance. Les administrateurs doivent la valider pour qu'elle devienne officielle.</p>
             </div>
 
-            <!-- Formulaire de Proposition avec Sélection Multi-Sous-Compétences (RA) -->
+            <!-- Formulaire de Proposition -->
             <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-4">
                 <h3 class="text-xs font-bold text-slate-700 uppercase flex items-center gap-2">
                     <i class="fa-solid fa-plus-circle text-icam-red"></i> Proposer une Évaluation ou Soutenance
@@ -263,7 +302,6 @@
                         </div>
                     </div>
 
-                    <!-- Sélecteur dynamique de sous-compétences -->
                     <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <label class="text-xs font-bold text-slate-700">Cocher les sous-compétences (RA) évaluées :</label>
@@ -271,11 +309,7 @@
                                 <option value="">-- Choisir un pôle (C01-C13) --</option>
                             </select>
                         </div>
-
-                        <!-- Zone de cases à cocher pour le C0X actif -->
                         <div id="propRACheckboxesArea" class="hidden p-2 bg-slate-50 rounded border border-slate-200 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs"></div>
-
-                        <!-- Badges des RA sélectionnés -->
                         <div class="pt-1">
                             <div class="text-[11px] text-slate-500 mb-1 font-medium">Sous-compétences (RA) retenues :</div>
                             <div id="selectedRAsBadges" class="flex flex-wrap gap-1.5 min-h-[30px] items-center p-1.5 bg-slate-50 rounded border border-dashed border-slate-200 text-xs">
@@ -292,14 +326,12 @@
                 </form>
             </div>
 
-            <!-- PANNEAU ADMIN : VALIDATION DES PROPOSITIONS EN ATTENTE -->
+            <!-- PANNEAU ADMIN -->
             <div id="adminValidationPanel" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl space-y-3">
                 <h3 class="text-xs font-bold text-amber-900 uppercase flex items-center gap-2">
                     <i class="fa-solid fa-user-shield text-amber-600"></i> Propositions d'évaluations en attente de confirmation Admin
                 </h3>
-                <div id="pendingEvalsList" class="space-y-2">
-                    <!-- Rempli en JS -->
-                </div>
+                <div id="pendingEvalsList" class="space-y-2"></div>
             </div>
 
             <!-- Import ICAM -->
@@ -333,7 +365,7 @@
             </div>
         </section>
 
-        <!-- ONGLET 3 : CLASSEMENT ET GESTION ADMIN -->
+        <!-- ONGLET 3 : CLASSEMENT -->
         <section id="secClassement" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6">
             <div class="flex items-center justify-between mb-4">
                 <div>
@@ -352,7 +384,7 @@
                             <th class="py-3 px-4">Élève</th>
                             <th class="py-3 px-4">Email ICAM</th>
                             <th class="py-3 px-4">Promotion</th>
-                            <th class="py-3 px-4">Moyenne C01-C13</th>
+                            <th class="py-3 px-4">Trajectoire PITCH</th>
                             <th class="py-3 px-4">Compétences Validées</th>
                             <th class="py-3 px-4 text-right">Action Admin</th>
                         </tr>
@@ -407,16 +439,56 @@
         }
 
         function switchTab(tab) {
-            ['referentiel', 'planning', 'classement'].forEach(t => {
-                document.getElementById(`sec${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add('hidden');
-                document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white";
+            ['referentiel', 'syncPitch', 'planning', 'classement'].forEach(t => {
+                const el = document.getElementById(`sec${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (el) el.classList.add('hidden');
+                if (btn) btn.className = "px-3 py-1.5 rounded-lg font-medium transition text-slate-300 hover:text-white";
             });
-            document.getElementById(`sec${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove('hidden');
-            document.getElementById(`tabBtn${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "px-3 py-1.5 rounded-lg font-medium transition bg-icam-red text-white";
             
-            if (tab === 'classement') {
-                renderClassTable();
-            }
+            const targetEl = document.getElementById(`sec${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+            const targetBtn = document.getElementById(`tabBtn${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+            if (targetEl) targetEl.classList.remove('hidden');
+            if (targetBtn) targetBtn.className = "px-3 py-1.5 rounded-lg font-medium transition bg-icam-red text-white";
+            
+            if (tab === 'classement') renderClassTable();
+            if (tab === 'syncPitch') updateScriptTextarea();
+        }
+
+        function updateScriptTextarea() {
+            if (!currentUser) return;
+            const targetUrl = window.location.origin + "/api/sync-pitch";
+            const script = `(async function(){
+    console.log("Synchronisation PITCH vers portal ICAM...");
+    try {
+        let email = "${currentUser.email}";
+        let scores = {};
+        // Extraction générique des notes/compétences présentes dans le DOM de PITCH
+        document.querySelectorAll('[data-ra], .ra-item, .score-card').forEach(el => {
+            let ra = el.getAttribute('data-ra') || el.innerText.match(/RA-[A-Z0-9-]+/)?.[0];
+            let val = parseInt(el.innerText.match(/(\\d+)%/)?.[1] || "75");
+            if(ra) scores[ra] = val;
+        });
+        
+        let res = await fetch("${targetUrl}", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ email: email, scores: scores, updatedAt: new Date().toISOString() })
+        });
+        let data = await res.json();
+        alert(data.message || "Synchro réussie !");
+    } catch(e) {
+        alert("Erreur de synchro PITCH : " + e.message);
+    }
+})();`;
+            document.getElementById('pitchSyncScriptCode').value = script;
+        }
+
+        function copyPitchScript() {
+            const copyText = document.getElementById("pitchSyncScriptCode");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("Script copié dans le presse-papier ! Va sur pitch-icam.rima1.fr, ouvre F12 (Console) et colle le code.");
         }
 
         function checkExistingSession() {
@@ -625,7 +697,21 @@
             let sum = 0;
             if (allKeys.length > 0) {
                 allKeys.forEach(k => sum += userScores[k]);
-                document.getElementById('userOverallScore').textContent = `${Math.round(sum / allKeys.length)}%`;
+                const overallAvg = Math.round(sum / allKeys.length);
+                document.getElementById('userOverallScore').textContent = `${overallAvg}%`;
+
+                // Calculateur Trajectoire 70% style PITCH+
+                const badge = document.getElementById('targetBadge70');
+                const circle = document.getElementById('targetCircle70');
+                if (overallAvg >= 70) {
+                    badge.textContent = "🟢 Sur la trajectoire 70%";
+                    badge.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-emerald-100 text-emerald-800 border border-emerald-300";
+                    circle.className = "w-12 h-12 rounded-full border-4 border-emerald-500 text-emerald-700 flex items-center justify-center font-bold text-xs bg-emerald-50";
+                } else {
+                    badge.textContent = "🔴 Sous la barre des 70%";
+                    badge.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-red-100 text-red-800 border border-red-300";
+                    circle.className = "w-12 h-12 rounded-full border-4 border-red-500 text-red-700 flex items-center justify-center font-bold text-xs bg-red-50";
+                }
             }
 
             let valCount = 0;
@@ -639,7 +725,7 @@
                 }
             });
             document.getElementById('validatedCount').textContent = `${valCount} / 13`;
-            document.getElementById('nextDeadlineText').textContent = earliestDate ? earliestDate : "Aucune définie";
+            document.getElementById('nextDeadlineText').textContent = earliestDate ? earliestDate : "Aucune séance décelée";
         }
 
         function renderClassTable() {
@@ -692,7 +778,7 @@
                             </td>
                             <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${st.email}</td>
                             <td class="py-3 px-4 text-slate-500">${st.promo || 'ICAM'}</td>
-                            <td class="py-3 px-4 font-bold ${isMe ? 'text-emerald-700' : 'text-icam-red'}">${avg}%</td>
+                            <td class="py-3 px-4 font-bold ${avg >= 70 ? 'text-emerald-600' : 'text-icam-red'}">${avg}% ${avg >= 70 ? '✓' : ''}</td>
                             <td class="py-3 px-4">${valCount} / 13</td>
                             <td class="py-3 px-4 text-right">${actionCell}</td>
                         `;
@@ -723,7 +809,6 @@
             });
         }
 
-        // GESTION DU SÉLECTEUR MULTI-SOUS-COMPÉTENCES (RA) DANS LE FORMULAIRE DE PROPOSITION
         function initPropC0XSelect() {
             const select = document.getElementById('propC0XSelect');
             if (!select) return;
@@ -798,7 +883,6 @@
             });
         }
 
-        // CHARGEMENT & PROPOSITION D'ÉVALUATIONS AVEC MODÉRATION ADMIN
         function loadCustomEvaluations() {
             fetch('/api/evaluations')
                 .then(res => res.json())
@@ -1007,12 +1091,10 @@
 
             let list = [];
 
-            // 1. Évaluations importées d'un fichier .ics
             importedEvents.forEach(ev => {
                 if (ev.date >= todayFormatted) list.push(ev);
             });
 
-            // 2. Évaluations de la base de données
             adminCustomEvals.forEach(ce => {
                 if (ce.date >= todayDash) {
                     if (ce.status === 'approved') {
@@ -1033,7 +1115,6 @@
                 }
             });
 
-            // 3. Validations personnelles des étudiants
             Object.keys(userValidation).forEach(key => {
                 if (userValidation[key].date && userValidation[key].date >= todayDash) {
                     list.push({
