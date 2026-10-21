@@ -236,10 +236,10 @@
                 <div>
                     <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-link mr-1.5 text-blue-600"></i>Lien d'abonnement iCal (Hyperplanning / Pronote)</h3>
                     <div class="flex gap-2">
-                        <input type="url" id="icalUrlInput" placeholder="https://hyperplanning.icam.fr/ical/..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red">
+                        <input type="url" id="icalUrlInput" placeholder="https://planning.icam.fr/Telechargements/ical/..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red">
                         <button onclick="importIcalUrl()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-700">Synchroniser</button>
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-1">Dans Hyperplanning/Pronote ➔ Paramètres ➔ Importer/Exporter ➔ Copier le lien iCal.</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Colle ton lien direct ICAM / Hyperplanning ici.</p>
                 </div>
 
                 <div>
@@ -259,7 +259,6 @@
                     <div class="text-center py-8 text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
                         <i class="fa-solid fa-calendar-xmark text-2xl mb-2 text-slate-300"></i>
                         <p>Aucun événement importé pour le moment.</p>
-                        <p class="text-[10px] text-slate-400 mt-1">Colle ton lien iCal ci-dessus ou choisis des dates de validation dans le référentiel.</p>
                     </div>
                 </div>
             </div>
@@ -383,7 +382,6 @@
             localStorage.setItem(`icam_scores_${currentUser.email}`, JSON.stringify(userScores));
             localStorage.setItem(`icam_val_${currentUser.email}`, JSON.stringify(userValidation));
 
-            // Envoi au serveur PythonAnywhere
             fetch('/api/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -395,7 +393,7 @@
                     validation: userValidation,
                     updatedAt: new Date().toISOString()
                 })
-            }).catch(err => console.error("Erreur d'enregistrement serveur :", err));
+            }).catch(err => console.error("Erreur serveur :", err));
 
             updateGlobalStats();
             renderClassTable();
@@ -537,7 +535,27 @@
             });
         }
 
-        // Parsing ICS & Gestion Événements
+        // Import iCal via le proxy Flask backend
+        function importIcalUrl() {
+            const url = document.getElementById('icalUrlInput').value.trim();
+            if (!url) return alert("Colle un lien iCal valide.");
+
+            fetch('/api/fetch-ical', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    parseAndStoreIcs(data.content);
+                } else {
+                    alert("Erreur lors de la récupération du calendrier : " + data.message);
+                }
+            })
+            .catch(err => alert("Erreur de connexion au serveur."));
+        }
+
         function importIcsFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -546,15 +564,6 @@
                 parseAndStoreIcs(e.target.result);
             };
             reader.readAsText(file);
-        }
-
-        function importIcalUrl() {
-            const url = document.getElementById('icalUrlInput').value.trim();
-            if (!url) return alert("Colle un lien iCal valide.");
-            fetch(url)
-                .then(res => res.text())
-                .then(text => parseAndStoreIcs(text))
-                .catch(() => alert("Impossible d'accéder au lien iCal directement (CORS). Importe le fichier .ics directement."));
         }
 
         function parseAndStoreIcs(icsText) {
@@ -584,7 +593,6 @@
 
             let list = [...importedEvents];
 
-            // Ajoute aussi les dates limites définies pour les compétences
             Object.keys(userValidation).forEach(key => {
                 if (userValidation[key].date) {
                     list.push({
@@ -607,7 +615,7 @@
             }
 
             list.forEach(ev => {
-                const formattedDate = ev.date ? `${ev.date.substring(6,8)}/${ev.date.substring(4,6)}/${ev.date.substring(0,4)}` : "S.D";
+                const formattedDate = ev.date ? `${ev.date.substring(6,8)}/${ev.date.substring(4,6)}/${ev.date.substring(0,4)}` : "Date non précisée";
                 const div = document.createElement('div');
                 div.className = `p-3 rounded-xl border flex items-center justify-between text-xs ${ev.isValidation ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'}`;
                 div.innerHTML = `
