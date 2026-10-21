@@ -14,48 +14,48 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
 
 <!-- Connexion -->
-<div id="authModal" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+<div id="authModal" class="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full">
     <h2 class="text-2xl font-bold text-center mb-1">Portail ICAM</h2>
-    <p class="text-xs text-slate-500 text-center mb-6">Connexion avec ton adresse email ICAM</p>
+    <p class="text-xs text-slate-500 text-center mb-5">Connexion avec ton adresse email ICAM</p>
     <form onsubmit="handleLogin(event)" class="space-y-4">
-      <input type="text" id="userNameInput" required placeholder="Nom complet" class="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-icam-red outline-none">
+      <input type="text" id="userNameInput" required placeholder="Nom complet" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm">
       <div>
-        <input type="email" id="userEmailInput" required placeholder="prenom.nom@2031.icam.fr" class="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-icam-red outline-none">
-        <p id="emailError" class="text-red-500 text-xs mt-1.5 hidden font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>L'adresse doit se terminer par "icam.fr".</p>
+        <input type="email" id="userEmailInput" required placeholder="nom.prenom@2031.icam.fr" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm">
+        <p id="emailError" class="text-red-500 text-xs mt-1 hidden">Email ICAM non valide.</p>
       </div>
-      <select id="userPromoInput" class="w-full px-4 py-3 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-icam-red outline-none">
+      <select id="userPromoInput" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm">
         <option>Bachelor International</option>
         <option>Ingénieur Apprentissage</option>
         <option>Ingénieur Généraliste</option>
       </select>
-      <button type="submit" class="w-full bg-icam-red text-white py-3.5 rounded-lg font-bold text-sm hover:bg-red-700 transition shadow-lg mt-2">Accéder à mon espace</button>
+      <button type="submit" class="w-full bg-icam-red text-white py-3 rounded-lg font-semibold text-sm">Accéder à mon espace</button>
     </form>
   </div>
 </div>
 
 <!-- En-tête -->
-<header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
+<header class="bg-slate-900 text-white sticky top-0 z-40">
   <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center gap-3">
-      <div class="bg-icam-red px-3 py-1.5 rounded-lg font-black text-xl shadow-inner">ICAM</div>
-      <h1 class="font-bold tracking-wide">Suivi Compétences</h1>
+      <div class="bg-icam-red px-3 py-1.5 rounded-lg font-black text-xl">ICAM</div>
+      <h1 class="font-bold">Suivi Compétences</h1>
     </div>
-    <nav class="flex gap-1 bg-slate-800 p-1 rounded-xl text-xs font-semibold">
-      <button onclick="switchTab('Referentiel')" id="tabBtnReferentiel" class="px-3 py-1.5 rounded-lg transition-colors">Référentiel</button>
-      <button onclick="switchTab('Planning')" id="tabBtnPlanning" class="px-3 py-1.5 rounded-lg transition-colors">Planning</button>
-      <button onclick="switchTab('Sync')" id="tabBtnSync" class="px-3 py-1.5 rounded-lg transition-colors">Synchro PITCH</button>
-      <button onclick="switchTab('Classement')" id="tabBtnClassement" class="px-3 py-1.5 rounded-lg transition-colors">Promo</button>
+    <nav class="flex gap-1 bg-slate-800 p-1 rounded-xl text-xs">
+      <button onclick="switchTab('Referentiel')" id="tabBtnReferentiel" class="px-3 py-1.5 rounded-lg">Référentiel</button>
+      <button onclick="switchTab('Planning')" id="tabBtnPlanning" class="px-3 py-1.5 rounded-lg">Planning</button>
+      <button onclick="switchTab('Sync')" id="tabBtnSync" class="px-3 py-1.5 rounded-lg">Synchro PITCH</button>
+      <button onclick="switchTab('Classement')" id="tabBtnClassement" class="px-3 py-1.5 rounded-lg">Promo</button>
     </nav>
     <div class="flex items-center gap-3">
       <div id="userInfo" class="hidden text-right">
         <div class="flex items-center justify-end gap-1.5">
-          <span id="adminBadge" class="hidden text-[10px] bg-amber-500 text-slate-950 px-1.5 rounded font-black shadow-sm">ADMIN</span>
+          <span id="adminBadge" class="hidden text-[10px] bg-amber-500 text-slate-950 px-1.5 rounded font-black">ADMIN</span>
           <span id="displayUserName" class="text-xs font-bold"></span>
         </div>
         <div id="displayUserEmail" class="text-[10px] text-slate-400"></div>
       </div>
-      <button onclick="logout()" title="Se déconnecter" class="text-xs bg-slate-800 hover:bg-red-600 transition-colors px-3 py-2 rounded-lg"><i class="fa-solid fa-power-off"></i></button>
+      <button onclick="logout()" class="text-xs bg-slate-800 px-2.5 py-1.5 rounded-lg"><i class="fa-solid fa-power-off"></i></button>
     </div>
   </div>
 </header>
@@ -64,71 +64,71 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
 
   <!-- Stats -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <div class="bg-white p-4 rounded-xl border shadow-sm">
-      <div class="text-xs text-slate-500 font-semibold">Moyenne des RA</div>
-      <div class="text-2xl font-black text-slate-800" id="userOverallScore">0%</div>
+    <div class="bg-white p-4 rounded-xl border">
+      <div class="text-xs text-slate-500">Moyenne des RA</div>
+      <div class="text-2xl font-bold" id="userOverallScore">0%</div>
       <div id="targetBadge70" class="text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block bg-slate-100">—</div>
     </div>
-    <div class="bg-white p-4 rounded-xl border shadow-sm">
-      <div class="text-xs text-slate-500 font-semibold">RA synchronisés</div>
-      <div class="text-2xl font-black text-slate-800" id="raCount">0</div>
+    <div class="bg-white p-4 rounded-xl border">
+      <div class="text-xs text-slate-500">RA synchronisés</div>
+      <div class="text-2xl font-bold" id="raCount">0</div>
     </div>
-    <div class="bg-white p-4 rounded-xl border shadow-sm">
-      <div class="text-xs text-slate-500 font-semibold">Élèves inscrits</div>
-      <div class="text-2xl font-black text-slate-800" id="totalStudentsCount">1</div>
+    <div class="bg-white p-4 rounded-xl border">
+      <div class="text-xs text-slate-500">Élèves inscrits</div>
+      <div class="text-2xl font-bold" id="totalStudentsCount">1</div>
     </div>
-    <div class="bg-white p-4 rounded-xl border shadow-sm">
-      <div class="text-xs text-slate-500 font-semibold">Compétences validées</div>
-      <div class="text-2xl font-black text-slate-800" id="validatedCount">0 / 13</div>
+    <div class="bg-white p-4 rounded-xl border">
+      <div class="text-xs text-slate-500">Compétences validées</div>
+      <div class="text-2xl font-bold" id="validatedCount">0 / 13</div>
     </div>
   </div>
 
   <!-- Référentiel -->
-  <section id="secReferentiel" class="bg-white rounded-xl border shadow-sm p-4 sm:p-6">
+  <section id="secReferentiel" class="bg-white rounded-xl border p-4 sm:p-6">
     <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b">
       <h2 class="text-xl font-bold">Référentiel C01-C13</h2>
       <div class="flex gap-2">
-        <button onclick="refreshFromServer()" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-semibold transition">
+        <button onclick="refreshFromServer()" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-semibold">
           <i class="fa-solid fa-rotate mr-1"></i>Rafraîchir depuis le serveur
         </button>
-        <select id="competenceSelect" onchange="renderCompetenceDetails()" class="bg-slate-50 border rounded-lg p-2 text-sm font-semibold focus:ring-2 focus:ring-icam-red outline-none"></select>
+        <select id="competenceSelect" onchange="renderCompetenceDetails()" class="bg-slate-50 border rounded-lg p-2 text-sm font-semibold"></select>
       </div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-      <div class="lg:col-span-5 bg-slate-50 p-4 rounded-xl border flex justify-center items-center">
+      <div class="lg:col-span-5 bg-slate-50 p-4 rounded-xl border flex justify-center">
         <div class="relative w-full aspect-square max-w-[320px]"><canvas id="competenceRadarChart"></canvas></div>
       </div>
       <div class="lg:col-span-7 space-y-5">
         <div>
-          <h3 id="compTitle" class="text-lg font-bold text-slate-900"></h3>
-          <p id="compDescription" class="text-xs text-slate-500 mt-1"></p>
+          <h3 id="compTitle" class="text-lg font-bold"></h3>
+          <p id="compDescription" class="text-xs text-slate-500"></p>
         </div>
-        <div id="raListContainer" class="space-y-2 max-h-64 overflow-y-auto pr-2"></div>
+        <div id="raListContainer" class="space-y-2"></div>
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
-          <h4 class="text-xs font-bold text-blue-900 uppercase"><i class="fa-solid fa-folder-open mr-1.5"></i>Fiche de révision (PDF / Drive)</h4>
+          <h4 class="text-xs font-bold text-blue-900 uppercase">Fiche de révision (PDF / Drive)</h4>
           <div class="flex gap-2">
-            <input type="url" id="valRevisionPdf" onchange="updateValidationDetails()" placeholder="Lien Google Drive, OneDrive ou PDF..." class="flex-1 border rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-400 outline-none">
-            <button onclick="openRevisionPdf()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 rounded-lg transition shadow-sm">Ouvrir</button>
+            <input type="url" id="valRevisionPdf" onchange="updateValidationDetails()" placeholder="https://drive.google.com/..." class="flex-1 border rounded-lg p-2 text-xs">
+            <button onclick="openRevisionPdf()" class="bg-blue-600 text-white text-xs px-3 rounded-lg">Ouvrir</button>
           </div>
         </div>
 
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-amber-900 uppercase"><i class="fa-solid fa-calendar-check mr-1.5"></i>Planification de la validation</h4>
-            <button onclick="syncCurrentCompToGoogleCalendar()" class="bg-white border border-amber-300 hover:bg-amber-100 text-[11px] px-2.5 py-1 rounded-lg font-semibold transition shadow-sm">
-              <i class="fa-brands fa-google text-red-500 mr-1"></i>Google Agenda
+            <h4 class="text-xs font-bold text-amber-900 uppercase">Planification de la validation</h4>
+            <button onclick="syncCurrentCompToGoogleCalendar()" class="bg-white border border-amber-300 text-[11px] px-2.5 py-1 rounded-lg font-semibold">
+              <i class="fa-brands fa-google text-red-500 mr-1"></i>Google Calendar
             </button>
           </div>
           <div class="grid sm:grid-cols-2 gap-3">
-            <input type="date" id="valDate" onchange="updateValidationDetails()" class="border rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none">
-            <select id="valReferee" onchange="updateValidationDetails()" class="border rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none">
+            <input type="date" id="valDate" onchange="updateValidationDetails()" class="border rounded-lg p-2 text-xs bg-white">
+            <select id="valReferee" onchange="updateValidationDetails()" class="border rounded-lg p-2 text-xs bg-white">
               <option>Tuteur ICAM</option><option>Enseignant Référent</option><option>Tuteur Entreprise</option><option>Jury de Soutenance</option>
             </select>
-            <select id="valStatus" onchange="updateValidationDetails()" class="border rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none">
+            <select id="valStatus" onchange="updateValidationDetails()" class="border rounded-lg p-2 text-xs bg-white">
               <option>Non commencé</option><option>En cours</option><option>Prêt pour évaluation</option><option>Validé</option>
             </select>
-            <input type="url" id="valProof" onchange="updateValidationDetails()" placeholder="Lien du livrable (Drive, GitHub...)" class="border rounded-lg p-2 text-xs bg-white focus:ring-2 focus:ring-amber-400 outline-none">
+            <input type="url" id="valProof" onchange="updateValidationDetails()" placeholder="Lien du livrable" class="border rounded-lg p-2 text-xs bg-white">
           </div>
         </div>
       </div>
@@ -136,146 +136,138 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
   </section>
 
   <!-- Planning -->
-  <section id="secPlanning" class="hidden bg-white rounded-xl border shadow-sm p-4 sm:p-6 space-y-6">
-    <h2 class="text-xl font-bold border-b pb-3">Planning & Évaluations</h2>
+  <section id="secPlanning" class="hidden bg-white rounded-xl border p-4 sm:p-6 space-y-6">
+    <h2 class="text-xl font-bold">Planning & Évaluations</h2>
 
     <form onsubmit="proposeStudentEvaluation(event)" class="bg-slate-50 border rounded-xl p-4 space-y-3">
-      <h3 class="text-xs font-bold uppercase text-slate-700"><i class="fa-solid fa-bullhorn mr-1.5"></i>Proposer une évaluation (Validation requise)</h3>
+      <h3 class="text-xs font-bold uppercase">Proposer une évaluation ou soutenance (validation admin requise)</h3>
       <div class="grid sm:grid-cols-12 gap-3">
-        <input type="text" id="propEvalTitle" required placeholder="Titre de l'évaluation (ex: Soutenance C03)" class="sm:col-span-7 border rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-slate-300">
-        <input type="date" id="propEvalDate" required class="sm:col-span-5 border rounded-lg p-2 text-xs bg-white outline-none focus:ring-2 focus:ring-slate-300">
+        <input type="text" id="propEvalTitle" required placeholder="Titre" class="sm:col-span-7 border rounded-lg p-2 text-xs bg-white">
+        <input type="date" id="propEvalDate" required class="sm:col-span-5 border rounded-lg p-2 text-xs bg-white">
       </div>
-      <div class="bg-white p-3 rounded-lg border space-y-3">
+      <div class="bg-white p-3 rounded-lg border space-y-2">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-xs font-bold text-slate-700">Compétences ciblées (RA) :</span>
-          <select id="propC0XSelect" onchange="renderPropRACheckboxes()" class="border rounded text-xs p-1.5 bg-slate-50 outline-none"></select>
+          <span class="text-xs font-bold">Sous-compétences (RA) évaluées :</span>
+          <select id="propC0XSelect" onchange="renderPropRACheckboxes()" class="border rounded text-xs p-1 bg-slate-50"></select>
         </div>
         <div id="propRACheckboxesArea" class="hidden grid grid-cols-2 md:grid-cols-3 gap-2 text-xs"></div>
-        <div id="selectedRAsBadges" class="flex flex-wrap gap-1.5 min-h-[28px] text-xs bg-slate-50 p-2 rounded border border-dashed"></div>
+        <div id="selectedRAsBadges" class="flex flex-wrap gap-1.5 min-h-[28px] text-xs"></div>
       </div>
-      <div class="text-right"><button type="submit" class="bg-slate-800 hover:bg-slate-900 transition-colors text-white text-xs font-bold px-6 py-2.5 rounded-lg shadow">Soumettre la proposition</button></div>
+      <div class="text-right"><button class="bg-slate-800 text-white text-xs font-bold px-5 py-2 rounded-lg">Envoyer</button></div>
     </form>
 
-    <div id="adminValidationPanel" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl space-y-2 shadow-inner">
-      <h3 class="text-xs font-bold text-amber-900 uppercase"><i class="fa-solid fa-user-shield mr-1.5"></i>Propositions en attente (Admin)</h3>
+    <div id="adminValidationPanel" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl space-y-2">
+      <h3 class="text-xs font-bold text-amber-900 uppercase">Propositions en attente (admin)</h3>
       <div id="pendingEvalsList" class="space-y-2"></div>
     </div>
 
-    <!-- Explications Calendrier -->
-    <div class="bg-indigo-50 border border-indigo-100 p-5 rounded-xl space-y-5">
-      <h3 class="text-sm font-bold uppercase text-indigo-900 border-b border-indigo-200 pb-2">
-        <i class="fa-regular fa-calendar-days mr-2"></i>Synchroniser WebAurion ou Google Agenda
-      </h3>
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="space-y-3">
-          <h4 class="text-xs font-bold text-indigo-800 bg-indigo-100 px-3 py-1 rounded inline-block">Option A : Lien iCal (Automatique)</h4>
-          <ul class="text-[11px] text-slate-600 space-y-1.5 list-disc ml-4">
-            <li><b>WebAurion :</b> <em>Mon planning</em> > Icône <em>Exporter (Agenda)</em> > Copie le lien.</li>
-            <li><b>Google Agenda :</b> <em>Paramètres</em> > <em>Intégrer l'agenda</em> > Copie <em>l'Adresse secrète iCal</em>.</li>
-          </ul>
-          <div class="flex gap-2 pt-1">
-            <input type="url" id="icalUrlInput" placeholder="Colle le lien https://..." class="flex-1 border border-indigo-200 rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-indigo-400">
-            <button onclick="importIcalUrl()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 rounded-lg text-xs transition shadow-sm">Lier</button>
-          </div>
+    <div class="bg-slate-50 p-4 rounded-xl border grid md:grid-cols-2 gap-4">
+      <div>
+        <h3 class="text-xs font-bold uppercase mb-2">Importer un fichier .ics</h3>
+        <input type="file" accept=".ics" onchange="importIcsFile(event)" class="text-xs">
+      </div>
+      <div>
+        <h3 class="text-xs font-bold uppercase mb-2">Lien d'abonnement</h3>
+        <div class="flex gap-2">
+          <input type="url" id="icalUrlInput" placeholder="https://..." class="flex-1 border rounded-lg p-2 text-xs">
+          <button onclick="importIcalUrl()" class="bg-slate-800 text-white px-3 rounded-lg text-xs">OK</button>
         </div>
-        <div class="space-y-3 md:border-l md:border-indigo-200 md:pl-6">
-          <h4 class="text-xs font-bold text-indigo-800 bg-indigo-100 px-3 py-1 rounded inline-block">Option B : Fichier .ics (Manuel)</h4>
-          <p class="text-[11px] text-slate-600">
-            Télécharge le fichier <b>.ics</b> depuis ton calendrier et importe-le. Les mots-clés ("DS", "QCM", "Pitch", "Soutenance") seront détectés.
-          </p>
-          <div class="pt-1">
-            <input type="file" accept=".ics" onchange="importIcsFile(event)" class="text-xs w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 cursor-pointer transition">
-          </div>
-        </div>
+        <button type="button" onclick="goToAgendaGuide()" class="text-[11px] text-blue-600 underline mt-1.5"><i class="fa-regular fa-circle-question mr-1"></i>Où trouver ce lien dans Google Agenda ?</button>
       </div>
     </div>
 
     <div>
-      <h3 class="text-sm font-bold mb-3 flex items-center">
-        Évaluations à venir 
-        <span id="eventCountBadge" class="ml-2 bg-red-100 text-icam-red text-xs px-2.5 py-0.5 rounded-full font-bold shadow-sm">0</span>
-      </h3>
-      <div id="calendarEventsContainer" class="space-y-2 max-h-96 overflow-y-auto pr-2"></div>
+      <h3 class="text-sm font-bold mb-3">Évaluations à venir <span id="eventCountBadge" class="ml-2 bg-red-100 text-icam-red text-xs px-2 py-0.5 rounded-full">0</span></h3>
+      <div id="calendarEventsContainer" class="space-y-2 max-h-96 overflow-y-auto"></div>
     </div>
   </section>
 
   <!-- Synchro PITCH -->
   <section id="secSync" class="hidden space-y-6">
-    <div class="bg-white rounded-xl border shadow-sm p-4 sm:p-6 space-y-2">
-      <h2 class="text-xl font-bold border-b pb-3 mb-4">Synchronisation avec PITCH ICAM</h2>
-      <p class="text-sm text-slate-600">Récupère tes scores automatiquement depuis la plateforme officielle pour mettre à jour tes jauges sans rien saisir manuellement.</p>
-    </div>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      
-      <!-- ÉTAPE 1 : INSTALLATION -->
-      <div class="bg-blue-50 border border-blue-200 p-5 rounded-xl shadow-sm space-y-4">
-        <h3 class="font-bold text-blue-900 text-lg flex items-center">
-          <span class="bg-blue-600 text-white w-6 h-6 flex justify-center items-center rounded-full text-xs mr-2 shadow">1</span>
-          Installer l'extension
-        </h3>
-        
-        <a href="pitch-sync-extension.zip" download class="flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl text-sm transition shadow-md w-full">
-          <i class="fa-solid fa-file-zipper text-lg"></i> Télécharger l'extension (.zip)
-        </a>
-
-        <ol class="list-decimal ml-4 text-[11px] text-slate-700 space-y-2 font-medium">
-          <li>Fais un <b>clic-droit</b> sur le fichier <code>.zip</code> téléchargé, puis clique sur <b>Extraire tout</b>.</li>
-          <li>Ouvre un nouvel onglet Chrome et tape <code class="bg-white text-blue-800 px-1 py-0.5 border rounded">chrome://extensions/</code>.</li>
-          <li>Active le <b>Mode développeur</b> via le bouton en haut à droite.</li>
-          <li>Clique sur <b>Charger l'extension non empaquetée</b> en haut à gauche.</li>
-          <li>Sélectionne le dossier <code>pitch-sync-extension</code> extrait. C'est fait !</li>
-        </ol>
+    <!-- PITCH -->
+    <div class="bg-white rounded-xl border p-4 sm:p-6 space-y-5">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div class="max-w-xl">
+          <h2 class="text-xl font-bold">Synchro PITCH</h2>
+          <p class="text-sm text-slate-600 mt-1">Une petite extension navigateur lit ton avancement sur PITCH et l'envoie sur ce portail. Tu l'installes une seule fois, ensuite il suffit d'un clic.</p>
+        </div>
+        <button onclick="downloadExtension()" class="bg-icam-red hover:bg-red-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow">
+          <i class="fa-solid fa-download mr-2"></i>Télécharger l'extension (.zip)
+        </button>
       </div>
 
-      <!-- ÉTAPE 2 : EXÉCUTION -->
-      <div class="bg-red-50 border border-red-200 p-5 rounded-xl shadow-sm space-y-4 flex flex-col">
-        <h3 class="font-bold text-red-900 text-lg flex items-center">
-          <span class="bg-icam-red text-white w-6 h-6 flex justify-center items-center rounded-full text-xs mr-2 shadow">2</span>
-          Lancer la capture
-        </h3>
-        
-        <ol class="list-decimal ml-4 text-[11px] text-slate-700 space-y-2 font-medium flex-1">
-          <li>Connecte-toi normalement sur <a href="https://pitch-icam.rima1.fr/" target="_blank" class="text-red-600 underline font-bold">PITCH ICAM</a>.</li>
-          <li>Clique sur le gros bouton rouge <b>⚡ Synchro Automatique C01-C13</b> apparu en bas à droite de l'écran.</li>
-          <li>L'extension va scanner tes onglets toute seule. <b>Laisse-la tourner</b> pendant quelques secondes.</li>
-          <li>Dès que l'alerte <i>"Synchronisation réussie"</i> apparaît, reviens sur cette page.</li>
-        </ol>
+      <div class="text-xs bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3">
+        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+        Fonctionne sur <b>ordinateur</b> avec <b>Chrome, Edge ou Brave</b>. Pas sur téléphone, pas sur Firefox/Safari.
+      </div>
 
-        <div class="border-t border-red-200 pt-4 mt-auto">
-          <p class="text-xs font-bold text-red-900 mb-2 text-center">Dernière étape : Mettre à jour ce tableau de bord</p>
-          <button onclick="refreshFromServer()" class="w-full bg-icam-red hover:bg-red-700 text-white text-sm font-bold px-4 py-3 rounded-xl shadow-md transition flex justify-center items-center gap-2">
-            <i class="fa-solid fa-rotate-right"></i> Rafraîchir mes scores
-          </button>
-          <div id="syncStatus" class="text-[10px] text-slate-500 mt-2 text-center italic">En attente de synchronisation...</div>
+      <div>
+        <h3 class="text-sm font-bold uppercase text-slate-500 mb-3">A. Installation <span class="normal-case font-normal">(une seule fois, ~2 min)</span></h3>
+        <ol id="pitchInstallSteps" class="space-y-3"></ol>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-bold uppercase text-slate-500 mb-3">B. Synchroniser <span class="normal-case font-normal">(à chaque fois que tu veux mettre à jour)</span></h3>
+        <ol id="pitchUseSteps" class="space-y-3"></ol>
+      </div>
+
+      <details class="text-sm border rounded-xl p-3 bg-slate-50">
+        <summary class="cursor-pointer font-semibold">Ça ne marche pas ? Problèmes fréquents</summary>
+        <ul id="pitchTroubles" class="mt-3 space-y-2 text-xs text-slate-700 list-disc pl-5"></ul>
+      </details>
+
+      <div class="border-t pt-4 space-y-2">
+        <button onclick="refreshFromServer()" class="bg-icam-red text-white text-sm font-semibold px-4 py-2 rounded-lg">Rafraîchir mes scores</button>
+        <div id="syncStatus" class="text-xs text-slate-500"></div>
+        <details class="text-xs text-slate-600">
+          <summary class="cursor-pointer font-semibold">Voir ce que le serveur a enregistré pour moi</summary>
+          <pre id="syncDebug" class="bg-slate-900 text-emerald-400 p-3 rounded-lg mt-2 overflow-auto max-h-64"></pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- Google Agenda -->
+    <div id="guideAgenda" class="bg-white rounded-xl border p-4 sm:p-6 space-y-5">
+      <div>
+        <h2 class="text-xl font-bold"><i class="fa-brands fa-google text-red-500 mr-2"></i>Synchro Google Agenda</h2>
+        <p class="text-sm text-slate-600 mt-1">Le portail lit ton agenda et repère tout seul tes évaluations à venir : les événements dont le titre contient <i>éval, examen, DS, partiel, soutenance, contrôle, QCM, test, rendu</i> ou <i>pitch</i>. Ils apparaissent dans l'onglet Planning.</p>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-bold uppercase text-slate-500 mb-3">Méthode 1 : le lien secret iCal <span class="normal-case font-normal text-emerald-700">(recommandée, automatique)</span></h3>
+        <ol id="agendaLinkSteps" class="space-y-3"></ol>
+        <div class="mt-3 text-xs bg-red-50 border border-red-200 text-red-900 rounded-lg p-3">
+          <b>🔒 Ce lien est secret.</b> Quiconque l'a peut lire tout ton agenda : ne le partage pas. Si tu penses qu'il a fuité, clique sur « Réinitialiser » à côté de lui dans Google Agenda (l'ancien lien cesse de fonctionner). Note : c'est le serveur du portail qui télécharge ton agenda via ce lien.
         </div>
       </div>
-    </div>
 
-    <!-- LOGS DEBOGAGE -->
-    <details class="text-xs text-slate-600 bg-white p-3 rounded-xl border shadow-sm cursor-pointer mt-4">
-      <summary class="font-semibold select-none">Console développeur (Voir les données PITCH brutes reçues)</summary>
-      <pre id="syncDebug" class="bg-slate-900 text-emerald-400 p-4 rounded-lg mt-3 overflow-auto max-h-64 text-[10px] font-mono shadow-inner"></pre>
-    </details>
+      <div>
+        <h3 class="text-sm font-bold uppercase text-slate-500 mb-3">Méthode 2 : exporter un fichier .ics <span class="normal-case font-normal">(manuelle, sans partager de lien)</span></h3>
+        <ol id="agendaFileSteps" class="space-y-3"></ol>
+      </div>
+
+      <details class="text-sm border rounded-xl p-3 bg-slate-50">
+        <summary class="cursor-pointer font-semibold">Ça ne marche pas ? Problèmes fréquents</summary>
+        <ul id="agendaTroubles" class="mt-3 space-y-2 text-xs text-slate-700 list-disc pl-5"></ul>
+      </details>
+
+      <button onclick="switchTab('Planning'); window.scrollTo({top:0,behavior:'smooth'})" class="bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-lg">
+        <i class="fa-solid fa-arrow-right mr-1"></i>Aller coller mon lien dans Planning
+      </button>
+    </div>
   </section>
 
   <!-- Promo -->
-  <section id="secClassement" class="hidden bg-white rounded-xl border shadow-sm p-4 sm:p-6">
-    <div class="flex items-center justify-between mb-4 border-b pb-3">
-      <h3 class="text-lg font-bold">Tableau de bord de la Promotion</h3>
-      <button onclick="renderClassTable()" class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5 shadow-sm">
-        <i class="fa-solid fa-arrows-rotate"></i> Actualiser
-      </button>
+  <section id="secClassement" class="hidden bg-white rounded-xl border p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold">Promotion</h3>
+      <button onclick="renderClassTable()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-semibold">Actualiser</button>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs">
-        <thead><tr class="bg-slate-50 text-slate-500 border-b">
-          <th class="p-3 font-semibold rounded-tl-lg">Élève</th>
-          <th class="p-3 font-semibold">Email</th>
-          <th class="p-3 font-semibold">Promo</th>
-          <th class="p-3 font-semibold">Moyenne RA</th>
-          <th class="p-3 font-semibold">Validées</th>
-          <th class="p-3 text-right font-semibold rounded-tr-lg">Action Admin</th>
+        <thead><tr class="bg-slate-50 text-slate-500">
+          <th class="p-3">Élève</th><th class="p-3">Email</th><th class="p-3">Promo</th><th class="p-3">Moyenne RA</th><th class="p-3">Validées</th><th class="p-3 text-right">Admin</th>
         </tr></thead>
         <tbody id="classTableBody" class="divide-y"></tbody>
       </table>
@@ -309,79 +301,151 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const isAdmin = () => currentUser && ADMIN_EMAILS.includes(currentUser.email);
 
+/* ---- Extension PITCH (zip embarqué : aucun fichier à héberger à côté) ---- */
+const EXT_ZIP_B64 = "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";
+
+function downloadExtension() {
+  const bin = atob(EXT_ZIP_B64), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'pitch-sync-extension-v2.zip';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function copyText(text, btn) {
+  const done = () => { const o = btn.innerHTML; btn.innerHTML = '✓ Copié'; setTimeout(() => btn.innerHTML = o, 1500); };
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(done).catch(() => prompt('Copie ce texte :', text));
+  else prompt('Copie ce texte :', text);
+}
+
+const PITCH_INSTALL = [
+  "<b>Télécharge</b> le fichier avec le bouton rouge ci-dessus (<code>pitch-sync-extension-v2.zip</code>).",
+  "<b>Décompresse-le</b> : sous Windows, clic droit sur le zip puis « Extraire tout… » ; sous Mac, double-clic. Tu obtiens un dossier <code>pitch-sync-extension</code> contenant 3 fichiers (<code>manifest.json</code>, <code>inject.js</code>, <code>content.js</code>). <b>Range-le à un endroit stable</b> (ex. Documents) : si tu le supprimes ou le déplaces, l'extension s'arrête.",
+  "Ouvre la page des extensions : tape <code>chrome://extensions</code> dans la barre d'adresse <button type='button' onclick=\"copyText('chrome://extensions', this)\" class='ml-1 text-[11px] bg-slate-100 hover:bg-slate-200 border px-2 py-0.5 rounded'>Copier</button> <span class='text-slate-500'>(Edge : <code>edge://extensions</code> · Brave : <code>brave://extensions</code>)</span>. Un lien cliquable ne marche pas, c'est une limite du navigateur : copie-colle l'adresse.",
+  "Active le <b>« Mode développeur »</b> (interrupteur en haut à droite de la page).",
+  "Clique sur <b>« Charger l'extension non empaquetée »</b> (en haut à gauche ; sur Edge : « Charger l'extension décompressée »), puis sélectionne le dossier <code>pitch-sync-extension</code>. <b>Attention :</b> choisis le dossier qui contient directement <code>manifest.json</code>, pas le .zip, pas un dossier parent.",
+  "« ICAM PITCH Sync » apparaît dans la liste avec son interrupteur activé. ✅ C'est installé. <span class='text-slate-500'>(Optionnel : icône puzzle 🧩 en haut à droite de Chrome, puis l'épingle.)</span>"
+];
+
+const PITCH_USE = [
+  "Va sur <b>PITCH</b> (<code>pitch-icam.rima1.fr</code>) et connecte-toi comme d'habitude. Si l'onglet était déjà ouvert avant l'installation, fais <b>F5</b>.",
+  "Ouvre tes compétences et <b>clique sur une compétence (ex. C01)</b>. C'est indispensable : ça force PITCH à charger les RA, et l'extension s'en sert pour aller lire les 13 blocs C01 à C13.",
+  "Un bouton rouge <b>« ⚡ Synchro vers mon portail »</b> est en bas à droite de la page PITCH. Clique dessus.",
+  "Saisis <b>exactement le même email</b> que celui de ce portail (ex. <code>nom.prenom@2031.icam.fr</code>). Il est mémorisé pour les fois suivantes.",
+  "Attends quelques secondes. Un message ✅ t'indique combien de RA ont été envoyés (les RA « non évalués » dans PITCH sont ignorés, c'est normal).",
+  "Reviens ici et clique sur <b>« Rafraîchir mes scores »</b> en bas de cette section. Tes RA apparaissent dans le Référentiel, et ta moyenne dans la Promo."
+];
+
+const PITCH_TROUBLES = [
+  "<b>Je ne vois pas le bouton rouge</b> : vérifie que l'extension est activée dans <code>chrome://extensions</code>, que tu es bien sur <code>https://pitch-icam.rima1.fr</code>, puis fais F5.",
+  "<b>« Pas de réponse de la page »</b> : fais F5 sur PITCH et recommence.",
+  "<b>« Aucun avancement trouvé »</b> : F5, clique sur une compétence (ex. C01), attends que ses RA s'affichent, puis relance la synchro.",
+  "<b>Le portail dit « Aucune donnée serveur pour… »</b> : l'email saisi dans l'extension n'est pas le même que celui du portail. Relance la synchro et corrige-le dans la fenêtre qui s'ouvre.",
+  "<b>Chrome affiche « Désactiver les extensions en mode développeur »</b> au démarrage : normal pour une extension qui ne vient pas du Chrome Web Store. Ferme le message sans désactiver.",
+  "<b>Mise à jour de l'extension</b> : remplace les fichiers dans ton dossier, puis clique sur l'icône ↻ de la carte de l'extension dans <code>chrome://extensions</code>.",
+  "<b>Mes curseurs ont changé</b> : les scores PITCH écrasent tes réglages manuels à chaque synchro. Pour les RA que PITCH n'évalue pas encore, tes valeurs manuelles sont conservées."
+];
+
+const AGENDA_LINK = [
+  "Ouvre <b>calendar.google.com</b> sur <b>ordinateur</b> (l'appli mobile ne donne pas ce lien).",
+  "Clique sur la roue ⚙️ en haut à droite, puis <b>« Paramètres »</b>.",
+  "Dans la colonne de gauche, repère <b>« Paramètres de mes agendas »</b> et clique sur le nom de l'agenda qui contient tes évaluations (souvent ton nom ou ton adresse ICAM). Pour un agenda ajouté (ex. planning de la promo), cherche-le plutôt sous <b>« Paramètres d'autres agendas »</b>.",
+  "Descends jusqu'à la section <b>« Intégrer l'agenda »</b>.",
+  "Copie l'<b>« Adresse secrète au format iCal »</b> (icône de copie à droite). Elle ressemble à <code>https://calendar.google.com/calendar/ical/…/basic.ics</code> et finit par <code>.ics</code>. <span class='text-slate-500'>(Les libellés peuvent légèrement varier selon la langue et la version de Google Agenda.)</span>",
+  "Reviens sur ce portail, onglet <b>Planning</b>, champ <b>« Lien d'abonnement »</b> : colle le lien et clique sur <b>OK</b>. Tes évaluations à venir s'affichent, et le lien est mémorisé : elles se rechargent toutes seules à ta prochaine visite."
+];
+
+const AGENDA_FILE = [
+  "Dans Google Agenda : roue ⚙️ → <b>« Paramètres »</b> → <b>« Importer et exporter »</b> (colonne de gauche).",
+  "Clique sur <b>« Exporter »</b> : un .zip se télécharge, avec un fichier <code>.ics</code> par agenda. Décompresse-le.",
+  "Sur ce portail, onglet <b>Planning</b> → « Importer un fichier .ics » et choisis le bon fichier. À refaire à chaque mise à jour de ton agenda."
+];
+
+const AGENDA_TROUBLES = [
+  "<b>« 0 évaluation détectée »</b> : seuls les événements <b>à venir</b> dont le titre contient un mot-clé (éval, examen, DS, partiel, soutenance, contrôle, QCM, test, rendu, pitch) sont gardés. Renomme tes événements en conséquence.",
+  "<b>Message d'erreur après « OK »</b> : le lien est incomplet ou périmé. Il doit commencer par <code>https://</code> et finir par <code>.ics</code>. Recopie-le en entier, sans espace.",
+  "<b>Je ne trouve pas « Intégrer l'agenda »</b> : tu es peut-être sur l'appli mobile, ou sur un agenda dont tu n'es pas propriétaire. Utilise un ordinateur, ou demande le lien à la personne qui gère l'agenda.",
+  "<b>Les événements récurrents</b> (qui se répètent chaque semaine) ne sont pas dépliés : seule leur première date est lue."
+];
+
+function renderSteps(id, steps) {
+  $(id).innerHTML = steps.map((t, i) =>
+    `<li class="flex gap-3"><span class="shrink-0 w-6 h-6 rounded-full bg-icam-red text-white text-xs font-bold flex items-center justify-center mt-0.5">${i + 1}</span><div class="text-sm leading-relaxed">${t}</div></li>`).join('');
+}
+function renderGuides() {
+  renderSteps('pitchInstallSteps', PITCH_INSTALL);
+  renderSteps('pitchUseSteps', PITCH_USE);
+  renderSteps('agendaLinkSteps', AGENDA_LINK);
+  renderSteps('agendaFileSteps', AGENDA_FILE);
+  $('pitchTroubles').innerHTML = PITCH_TROUBLES.map(t => '<li>' + t + '</li>').join('');
+  $('agendaTroubles').innerHTML = AGENDA_TROUBLES.map(t => '<li>' + t + '</li>').join('');
+}
+function goToAgendaGuide() {
+  switchTab('Sync');
+  $('guideAgenda').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-  const sel = $('competenceSelect'), psel =$('propC0XSelect');
+  const sel = $('competenceSelect'), psel = $('propC0XSelect');
   psel.innerHTML = '<option value="">-- Choisir C01-C13 --</option>';
   Object.keys(COMPETENCES_DB).forEach(k => {
     sel.add(new Option(COMPETENCES_DB[k].title, k));
     psel.add(new Option(k + ' - ' + COMPETENCES_DB[k].title, k));
   });
+  renderGuides();
   switchTab('Referentiel');
-  
-  // Sécurisation de la récupération du cache
   const saved = localStorage.getItem('icam_user_session');
   if (saved) {
-    try {
-      currentUser = JSON.parse(saved);
-      if (currentUser && currentUser.email) {
-        currentUser.email = currentUser.email.trim().toLowerCase();
-        $('authModal').classList.add('hidden');
-        updateUserHeader();
-        loadUserData();
-      } else {
-        localStorage.removeItem('icam_user_session');
-      }
-    } catch (e) {
-      localStorage.removeItem('icam_user_session'); // Cache corrompu, on nettoie
-    }
+    currentUser = JSON.parse(saved);
+    currentUser.email = currentUser.email.trim().toLowerCase();
+    $('authModal').classList.add('hidden');
+    updateUserHeader();
+    loadUserData();
   }
   loadCustomEvaluations();
 });
 
 function switchTab(tab) {
   ['Referentiel','Planning','Sync','Classement'].forEach(t => {
-    $('sec' + t).classList.add('hidden');$('tabBtn' + t).className = 'px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition-colors';
+    $('sec' + t).classList.add('hidden');
+    $('tabBtn' + t).className = 'px-3 py-1.5 rounded-lg text-slate-300';
   });
-  $('sec' + tab).classList.remove('hidden');$('tabBtn' + tab).className = 'px-3 py-1.5 rounded-lg bg-icam-red text-white shadow transition-colors';
+  $('sec' + tab).classList.remove('hidden');
+  $('tabBtn' + tab).className = 'px-3 py-1.5 rounded-lg bg-icam-red text-white';
   if (tab === 'Classement') renderClassTable();
 }
 
 function handleLogin(e) {
   e.preventDefault();
   const email = $('userEmailInput').value.trim().toLowerCase();
-  
-  // VÉRIFICATION DE L'EMAIL CORRIGÉE : Accepte tout ce qui finit par "icam.fr"
-  if (!email.endsWith('icam.fr')) { 
-    $('emailError').classList.remove('hidden'); 
-    return; 
-  }
-  
-  $('emailError').classList.add('hidden'); // Cache l'erreur si tout est bon
-  
-  currentUser = { name: $('userNameInput').value.trim(), email, promo:$('userPromoInput').value };
+  if (!/@(\d{4}\.)?(student\.)?icam\.fr$/.test(email)) { $('emailError').classList.remove('hidden'); return; }
+  currentUser = { name: $('userNameInput').value.trim(), email, promo: $('userPromoInput').value };
   localStorage.setItem('icam_user_session', JSON.stringify(currentUser));
   $('authModal').classList.add('hidden');
   updateUserHeader();
   loadUserData();
 }
 
-function logout() { 
-  localStorage.removeItem('icam_user_session'); 
-  location.reload(); 
-}
+function logout() { localStorage.removeItem('icam_user_session'); location.reload(); }
 
 function updateUserHeader() {
-  $('userInfo').classList.remove('hidden');$('displayUserName').textContent = currentUser.name;
+  $('userInfo').classList.remove('hidden');
+  $('displayUserName').textContent = currentUser.name;
   $('displayUserEmail').textContent = currentUser.email;
-  $('adminBadge').classList.toggle('hidden', !isAdmin());$('adminValidationPanel').classList.toggle('hidden', !isAdmin());
+  $('adminBadge').classList.toggle('hidden', !isAdmin());
+  $('adminValidationPanel').classList.toggle('hidden', !isAdmin());
 }
 
+// Charge le local PUIS le serveur (le serveur gagne : scores venant de PITCH)
 async function loadUserData() {
   const s = localStorage.getItem('icam_scores_' + currentUser.email);
   const v = localStorage.getItem('icam_val_' + currentUser.email);
   userScores = s ? JSON.parse(s) : {};
   userValidation = v ? JSON.parse(v) : {};
   await refreshFromServer(true);
+  autoLoadIcal();
 }
 
 async function refreshFromServer(silent) {
@@ -393,21 +457,25 @@ async function refreshFromServer(silent) {
     if (me) {
       if (me.scores) userScores = { ...userScores, ...me.scores };
       if (me.validation) userValidation = { ...me.validation, ...userValidation };
-      $('syncDebug').textContent = JSON.stringify(me.scores \vert{}\vert{} {}, null, 2);$('syncStatus').innerHTML = '<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check-circle"></i> Connecté au serveur</span> — Dernière synchro : ' + new Date().toLocaleTimeString() + ' (' + Object.keys(me.scores || {}).length + ' RA récupérés).';
+      $('syncDebug').textContent = JSON.stringify(me.scores || {}, null, 2);
+      $('syncStatus').textContent = 'Dernière lecture serveur : ' + new Date().toLocaleTimeString() +
+        ' — ' + Object.keys(me.scores || {}).length + ' RA reçus.';
     } else {
-      $('syncStatus').innerHTML = '<span class="text-amber-600"><i class="fa-solid fa-triangle-exclamation"></i> Aucune donnée trouvée</span> pour ' + currentUser.email + ". As-tu bien exécuté l'extension PITCH ?";
-      $('syncDebug').textContent = '(Aucune donnée)';
+      $('syncStatus').textContent = 'Aucune donnée serveur pour ' + currentUser.email +
+        ". Vérifie que l'email saisi dans l'extension est exactement le même.";
+      $('syncDebug').textContent = '(vide)';
     }
   } catch (e) {
-    $('syncStatus').innerHTML = '<span class="text-red-600 font-bold"><i class="fa-solid fa-circle-xmark"></i> Erreur Serveur</span> : ' + e.message;
+    $('syncStatus').textContent = 'Serveur injoignable : ' + e.message;
   }
   localStorage.setItem('icam_scores_' + currentUser.email, JSON.stringify(userScores));
   renderCompetenceDetails();
   updateGlobalStats();
   renderEventsList();
-  if (!silent) alert('Données synchronisées avec succès !');
+  if (!silent) alert('Scores rafraîchis : ' + Object.keys(userScores).length + ' RA.');
 }
 
+// Sauvegarde seulement quand l'utilisateur modifie quelque chose
 function saveUserData() {
   if (!currentUser) return;
   localStorage.setItem('icam_scores_' + currentUser.email, JSON.stringify(userScores));
@@ -427,15 +495,15 @@ function renderCompetenceDetails() {
   $('compTitle').textContent = comp.title;
   $('compDescription').textContent = comp.desc;
   const box = $('raListContainer');
-  box.innerHTML = comp.ras.length ? '' : '<p class="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-dashed text-center">Aucun Résultat d\'Apprentissage (RA) spécifique listé pour cette compétence.</p>';
+  box.innerHTML = comp.ras.length ? '' : '<p class="text-xs text-slate-400 italic">Aucun RA listé pour cette compétence.</p>';
   comp.ras.forEach(ra => {
     const score = userScores[ra] !== undefined ? Math.round(userScores[ra]) : 0;
     const d = document.createElement('div');
-    d.className = 'bg-white p-3 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-slate-300 transition';
-    d.innerHTML = `<span class="font-mono text-xs font-bold text-slate-700">${esc(ra)}</span>
+    d.className = 'bg-white p-2.5 rounded-lg border flex items-center justify-between';
+    d.innerHTML = `<span class="font-mono text-xs font-bold">${esc(ra)}</span>
       <div class="flex items-center gap-3">
-        <input type="range" min="0" max="100" step="5" value="${score}" oninput="updateRaScore('${esc(ra)}', this.value)" class="w-32 accent-icam-red cursor-pointer">
-        <span class="text-xs font-black w-10 text-right ${score >= 70 ? 'text-emerald-600' : 'text-slate-700'}" id="val_${esc(ra)}">${score}%</span>
+        <input type="range" min="0" max="100" step="5" value="${score}" oninput="updateRaScore('${esc(ra)}', this.value)" class="w-28 accent-red-600">
+        <span class="text-xs font-bold w-10 text-right" id="val_${esc(ra)}">${score}%</span>
       </div>`;
     box.appendChild(d);
   });
@@ -450,9 +518,7 @@ function renderCompetenceDetails() {
 
 function updateRaScore(ra, value) {
   userScores[ra] = parseInt(value);
-  const display = $('val_' + ra);
-  display.textContent = value + '%';
-  display.className = `text-xs font-black w-10 text-right ${value >= 70 ? 'text-emerald-600' : 'text-slate-700'}`;
+  $('val_' + ra).textContent = value + '%';
   saveUserData();
   renderRadar($('competenceSelect').value);
 }
@@ -468,28 +534,28 @@ function updateValidationDetails() {
 
 function openRevisionPdf() {
   const u = $('valRevisionPdf').value.trim();
-  if (!u) return alert("Veuillez d'abord coller le lien de votre dossier de révision (Google Drive, OneDrive, etc.).");
+  if (!u) return alert("Entre d'abord un lien.");
   window.open(u, '_blank');
 }
 
 function syncCurrentCompToGoogleCalendar() {
   const key = $('competenceSelect').value, d = $('valDate').value;
-  if (!d) return alert("Choisis d'abord une date de planification à gauche.");
+  if (!d) return alert("Choisis d'abord une date.");
   const f = d.replace(/-/g, '');
   const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' +
-    encodeURIComponent('Validation ICAM : ' + COMPETENCES_DB[key].title) + '&dates=' + f + '/' + f + '&details=' + encodeURIComponent('Préparation de la validation avec ' + $('valReferee').value);
+    encodeURIComponent('Validation ICAM : ' + COMPETENCES_DB[key].title) + '&dates=' + f + '/' + f;
   window.open(url, '_blank');
 }
 
 function renderRadar(key) {
-  const labels = COMPETENCES_DB[key].ras.map(r => r.split('-')[1] + '-' + r.split('-')[3]);
-  const data = COMPETENCES_DB[key].ras.map(ra => userScores[ra] !== undefined ? userScores[ra] : 0);
+  const labels = COMPETENCES_DB[key].ras;
+  const data = labels.map(ra => userScores[ra] !== undefined ? userScores[ra] : 0);
   if (radarChart) radarChart.destroy();
   if (!labels.length) return;
   radarChart = new Chart($('competenceRadarChart').getContext('2d'), {
     type: 'radar',
-    data: { labels, datasets: [{ label: 'Mon Niveau', data, backgroundColor: 'rgba(227,6,19,0.15)', borderColor: '#E30613', pointBackgroundColor: '#E30613', borderWidth: 2 }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { stepSize: 25, display: false }, pointLabels: { font: { size: 10, weight: 'bold' }, color: '#475569' } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ctx.raw + '%' } } } }
+    data: { labels, datasets: [{ label: 'Niveau', data, backgroundColor: 'rgba(227,6,19,0.2)', borderColor: '#E30613', borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { display: false }, pointLabels: { font: { size: 9 } } } }, plugins: { legend: { display: false } } }
   });
 }
 
@@ -500,7 +566,7 @@ function updateGlobalStats() {
     const avg = Math.round(keys.reduce((s, k) => s + Number(userScores[k]), 0) / keys.length);
     $('userOverallScore').textContent = avg + '%';
     const b = $('targetBadge70');
-    b.innerHTML = avg >= 70 ? '<i class="fa-solid fa-arrow-trend-up mr-1"></i>Au-dessus de 70%' : '<i class="fa-solid fa-arrow-trend-down mr-1"></i>Sous 70%';
+    b.textContent = avg >= 70 ? '🟢 Au-dessus de 70%' : '🔴 Sous 70%';
     b.className = 'text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block ' + (avg >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800');
   }
   const n = Object.values(userValidation).filter(v => v.status === 'Validé').length;
@@ -509,37 +575,30 @@ function updateGlobalStats() {
 
 function renderClassTable() {
   const tb = $('classTableBody');
-  tb.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Chargement de la promotion...</td></tr>';
+  tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Chargement...</td></tr>';
   fetch('/api/students').then(r => r.json()).then(db => {
     tb.innerHTML = '';
     const emails = Object.keys(db);
     $('totalStudentsCount').textContent = emails.length || 1;
-    if (!emails.length) { tb.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400 italic">Aucun élève enregistré pour le moment.</td></tr>'; return; }
-    
-    emails.sort((a,b) => {
-      const getAvg = e => { const sc = db[e].scores || {}, k = Object.keys(sc); return k.length ? k.reduce((s, x) => s + Number(sc[x]), 0) / k.length : 0; };
-      return getAvg(b) - getAvg(a);
-    }).forEach(e => {
+    if (!emails.length) { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Aucun élève.</td></tr>'; return; }
+    emails.forEach(e => {
       const st = db[e], sc = st.scores || {}, k = Object.keys(sc);
       const avg = k.length ? Math.round(k.reduce((s, x) => s + Number(sc[x]), 0) / k.length) : 0;
       const val = Object.values(st.validation || {}).filter(v => v.status === 'Validé').length;
       const me = currentUser && currentUser.email === st.email;
-      const act = isAdmin() ? `<button data-email="${esc(st.email)}" onclick="deleteStudentByAdmin(this.dataset.email)" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-2 py-1 rounded text-[10px] font-bold transition"><i class="fa-solid fa-trash-can mr-1"></i>Supprimer</button>` : '<span class="text-slate-300 text-[10px]">—</span>';
+      const act = isAdmin() ? `<button data-email="${esc(st.email)}" onclick="deleteStudentByAdmin(this.dataset.email)" class="text-red-600 text-[11px] font-bold"><i class="fa-solid fa-trash-can"></i> Supprimer</button>` : '—';
       const tr = document.createElement('tr');
-      tr.className = me ? 'bg-emerald-50/50' : 'hover:bg-slate-50 transition-colors';
-      tr.innerHTML = `<td class="p-3 font-medium text-slate-800">${esc(st.name || 'Élève')}${me ? ' <span class="bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.5 rounded ml-1 font-bold">MOI</span>' : ''}</td>
-        <td class="p-3 font-mono text-[10px] text-slate-500">${esc(st.email)}</td>
-        <td class="p-3 text-slate-600">${esc(st.promo || 'ICAM')}</td>
-        <td class="p-3"><span class="font-bold ${avg >= 70 ? 'text-emerald-600' : 'text-slate-800'}">${avg}%</span></td>
-        <td class="p-3 text-slate-600">${val} / 13</td>
-        <td class="p-3 text-right">${act}</td>`;
+      tr.className = me ? 'bg-emerald-50 font-semibold' : '';
+      tr.innerHTML = `<td class="p-3">${esc(st.name || 'Élève')}${me ? ' (vous)' : ''}</td><td class="p-3 font-mono text-[11px]">${esc(st.email)}</td>
+        <td class="p-3">${esc(st.promo || 'ICAM')}</td><td class="p-3 font-bold ${avg >= 70 ? 'text-emerald-600' : 'text-icam-red'}">${avg}%</td>
+        <td class="p-3">${val} / 13</td><td class="p-3 text-right">${act}</td>`;
       tb.appendChild(tr);
     });
-  }).catch(() => { tb.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Erreur réseau de chargement.</td></tr>'; });
+  }).catch(() => { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Erreur de chargement.</td></tr>'; });
 }
 
 function deleteStudentByAdmin(target) {
-  if (!confirm('Suppression de ' + target + ' définitive. Confirmer ?')) return;
+  if (!confirm('Supprimer ' + target + ' ?')) return;
   fetch('/api/admin/delete-student', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ adminEmail: currentUser.email, targetEmail: target }) })
     .then(r => r.json()).then(d => { alert(d.message); renderClassTable(); });
@@ -553,20 +612,20 @@ function renderPropRACheckboxes() {
   area.innerHTML = '';
   COMPETENCES_DB[c].ras.forEach(ra => {
     const l = document.createElement('label');
-    l.className = `flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer transition select-none ${selectedPropRAs.has(ra) ? 'bg-red-50 border-red-300' : 'bg-white hover:bg-slate-50'}`;
-    l.innerHTML = `<input type="checkbox" ${selectedPropRAs.has(ra) ? 'checked' : ''} onchange="togglePropRA('${esc(ra)}', this.checked)" class="accent-icam-red"><span class="font-mono text-[11px] font-semibold">${esc(ra)}</span>`;
+    l.className = 'flex items-center gap-2 bg-white px-2 py-1 rounded border cursor-pointer';
+    l.innerHTML = `<input type="checkbox" ${selectedPropRAs.has(ra) ? 'checked' : ''} onchange="togglePropRA('${esc(ra)}', this.checked)"><span class="font-mono text-xs">${esc(ra)}</span>`;
     area.appendChild(l);
   });
 }
-function togglePropRA(ra, on) { on ? selectedPropRAs.add(ra) : selectedPropRAs.delete(ra); renderPropRACheckboxes(); renderBadges(); }
+function togglePropRA(ra, on) { on ? selectedPropRAs.add(ra) : selectedPropRAs.delete(ra); renderBadges(); }
 function removePropRA(ra) { selectedPropRAs.delete(ra); renderPropRACheckboxes(); renderBadges(); }
 function renderBadges() {
   const b = $('selectedRAsBadges');
-  b.innerHTML = selectedPropRAs.size ? '' : '<span class="text-slate-400 italic p-1">Aucun RA sélectionné pour cette proposition.</span>';
+  b.innerHTML = selectedPropRAs.size ? '' : '<span class="text-slate-400 italic">Aucun RA sélectionné.</span>';
   selectedPropRAs.forEach(ra => {
     const s = document.createElement('span');
-    s.className = 'bg-red-100 border border-red-200 text-red-900 font-mono font-bold px-2 py-0.5 rounded-full text-[10px] flex items-center shadow-sm';
-    s.innerHTML = `${esc(ra)} <button type="button" onclick="removePropRA('${esc(ra)}')" class="ml-1.5 text-red-500 hover:text-red-900"><i class="fa-solid fa-xmark"></i></button>`;
+    s.className = 'bg-red-100 text-icam-red font-mono font-bold px-2 py-0.5 rounded-full';
+    s.innerHTML = `${esc(ra)} <button type="button" onclick="removePropRA('${esc(ra)}')">&times;</button>`;
     b.appendChild(s);
   });
 }
@@ -580,8 +639,6 @@ function loadCustomEvaluations() {
 function proposeStudentEvaluation(e) {
   e.preventDefault();
   if (!currentUser) return;
-  if(selectedPropRAs.size === 0) return alert("Merci de sélectionner au moins un Résultat d'Apprentissage (RA) à évaluer.");
-  
   fetch('/api/propose-evaluation', { method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ studentEmail: currentUser.email, title: $('propEvalTitle').value.trim(),
       date: $('propEvalDate').value, competence: Array.from(selectedPropRAs).join(', ') }) })
@@ -589,8 +646,8 @@ function proposeStudentEvaluation(e) {
       if (d.status === 'success') {
         $('propEvalTitle').value = ''; $('propEvalDate').value = '';
         selectedPropRAs.clear(); renderPropRACheckboxes(); renderBadges(); loadCustomEvaluations();
-        alert("Proposition envoyée avec succès ! En attente de validation par un enseignant.");
-      } else alert('Erreur serveur : ' + d.message);
+        alert("Proposition envoyée, en attente de validation d'un admin.");
+      } else alert('Erreur : ' + d.message);
     });
 }
 
@@ -600,21 +657,21 @@ function adminAction(url, body) {
     .then(r => r.json()).then(d => { if (d.status !== 'success') alert(d.message); loadCustomEvaluations(); });
 }
 const approveAdminEvaluation = id => adminAction('/api/admin/approve-evaluation', { evalId: id });
-const deleteAdminEvaluation = id => { if (confirm('Supprimer cette demande ?')) adminAction('/api/admin/delete-evaluation', { evalId: id }); };
+const deleteAdminEvaluation = id => { if (confirm('Supprimer cette évaluation ?')) adminAction('/api/admin/delete-evaluation', { evalId: id }); };
 
 function renderPending() {
   const box = $('pendingEvalsList');
   if (!isAdmin()) return;
   const list = customEvals.filter(e => e.status === 'pending');
-  box.innerHTML = list.length ? '' : '<div class="text-xs text-amber-800 bg-amber-100/50 p-3 rounded-lg border border-dashed border-amber-300 italic">Aucune proposition en attente de validation.</div>';
+  box.innerHTML = list.length ? '' : '<div class="text-xs text-amber-800 italic">Aucune proposition en attente.</div>';
   list.forEach(ev => {
     const d = document.createElement('div');
-    d.className = 'bg-white p-3 rounded-lg border shadow-sm flex items-center justify-between text-xs transition hover:border-amber-400';
-    d.innerHTML = `<div><div class="font-bold text-slate-800">${esc(ev.title)}</div> <div class="font-mono text-[9px] text-slate-500 mt-1 leading-relaxed w-48 truncate" title="${esc(ev.competence)}">${esc(ev.competence)}</div>
-      <div class="text-[10px] text-amber-700 mt-1 font-semibold"><i class="fa-solid fa-user mr-1"></i>${esc(ev.proposedBy)} — <i class="fa-regular fa-calendar ml-1 mr-1"></i>${esc(ev.date)}</div></div>
-      <div class="flex flex-col gap-1.5">
-        <button onclick="approveAdminEvaluation('${esc(ev.id)}')" class="bg-emerald-500 hover:bg-emerald-600 transition text-white text-[11px] font-bold px-3 py-1.5 rounded shadow-sm"><i class="fa-solid fa-check mr-1"></i>Valider</button>
-        <button onclick="deleteAdminEvaluation('${esc(ev.id)}')" class="bg-white hover:bg-red-50 text-red-600 border border-red-200 text-[11px] px-3 py-1.5 rounded transition"><i class="fa-solid fa-trash-can mr-1"></i>Refuser</button>
+    d.className = 'bg-white p-2.5 rounded-lg border flex items-center justify-between text-xs';
+    d.innerHTML = `<div><b>${esc(ev.title)}</b> <span class="font-mono text-[10px] text-slate-500">${esc(ev.competence)}</span>
+      <div class="text-[10px] text-slate-500">${esc(ev.proposedBy)} — ${esc(ev.date)}</div></div>
+      <div class="flex gap-1.5">
+        <button onclick="approveAdminEvaluation('${esc(ev.id)}')" class="bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded">Valider</button>
+        <button onclick="deleteAdminEvaluation('${esc(ev.id)}')" class="bg-red-50 text-red-600 border text-[11px] px-2 py-1 rounded">✕</button>
       </div>`;
     box.appendChild(d);
   });
@@ -623,9 +680,24 @@ function renderPending() {
 /* ---- Calendrier ---- */
 function importIcalUrl() {
   const url = $('icalUrlInput').value.trim();
-  if (!url) return alert('Copie-colle d\'abord ton lien iCal ou WebAurion dans la case.');
+  if (!url) return alert('Colle un lien.');
   fetch('/api/fetch-ical', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) })
-    .then(r => r.json()).then(d => d.status === 'success' ? parseIcs(d.content) : alert('Erreur de lecture du lien : ' + d.message));
+    .then(r => r.json()).then(d => {
+      if (d.status === 'success') {
+        parseIcs(d.content);
+        if (currentUser) localStorage.setItem('icam_ical_' + currentUser.email, url);
+      } else alert('Erreur : ' + d.message);
+    })
+    .catch(e => alert('Serveur injoignable : ' + e.message));
+}
+// Recharge silencieusement l'agenda mémorisé à chaque visite
+function autoLoadIcal() {
+  if (!currentUser) return;
+  const url = localStorage.getItem('icam_ical_' + currentUser.email);
+  if (!url) return;
+  $('icalUrlInput').value = url;
+  fetch('/api/fetch-ical', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) })
+    .then(r => r.json()).then(d => { if (d.status === 'success') parseIcs(d.content, true); }).catch(() => {});
 }
 function importIcsFile(ev) {
   const f = ev.target.files[0]; if (!f) return;
@@ -635,23 +707,26 @@ function todayStr() {
   const t = new Date();
   return t.getFullYear() + String(t.getMonth() + 1).padStart(2, '0') + String(t.getDate()).padStart(2, '0');
 }
-function parseIcs(txt) {
-  const kw = ['eval','évaluation','evaluation','examen','ds','partiel','soutenance','contrôle','controle','qcm','test','rendu','pitch'];
+function parseIcs(txt, silent) {
+  const longKw = ['eval', 'éval', 'évaluation', 'evaluation', 'examen', 'partiel', 'soutenance', 'contrôle', 'controle', 'rendu', 'pitch'];
+  const shortKw = /(^|[^a-zà-ÿ0-9])(ds|qcm|test)($|[^a-zà-ÿ0-9])/i; // mots courts : mot entier seulement
+  const isEval = s => { const l = s.toLowerCase(); return longKw.some(k => l.includes(k)) || shortKw.test(l); };
   const today = todayStr();
   let cur = null; importedEvents = [];
-  txt.split(/\r\n|\n/).forEach(line => {
+  // Les lignes longues d'un .ics sont "repliées" (la suite commence par un espace) : on les recolle
+  txt.replace(/\r?\n[ \t]/g, '').split(/\r\n|\n/).forEach(line => {
     if (line.startsWith('BEGIN:VEVENT')) cur = {};
     else if (line.startsWith('END:VEVENT')) {
-      if (cur && cur.summary && cur.date && cur.date >= today && kw.some(k => cur.summary.toLowerCase().includes(k))) importedEvents.push(cur);
+      if (cur && cur.summary && cur.date && cur.date >= today && isEval(cur.summary)) importedEvents.push(cur);
       cur = null;
     } else if (cur) {
-      if (line.startsWith('SUMMARY')) cur.summary = line.substring(line.indexOf(':') + 1).trim();
+      if (line.startsWith('SUMMARY')) cur.summary = line.substring(line.indexOf(':') + 1).replace(/\\,/g, ',').replace(/\\n/g, ' ').trim();
       if (line.startsWith('DTSTART')) cur.date = line.substring(line.indexOf(':') + 1).trim().substring(0, 8);
     }
   });
   importedEvents.sort((a, b) => a.date.localeCompare(b.date));
   renderEventsList();
-  alert('Analyse terminée : ' + importedEvents.length + ' évaluation(s) pertinente(s) à venir détectée(s) !');
+  if (!silent) alert(importedEvents.length + ' évaluation(s) à venir détectée(s).');
 }
 
 function renderEventsList() {
@@ -661,29 +736,27 @@ function renderEventsList() {
   customEvals.forEach(ce => {
     const d = ce.date.replace(/-/g, '');
     if (d < today) return;
-    const label = ce.title + (ce.competence ? ' [' + ce.competence.substring(0,25) + '...]' : '');
+    const label = ce.title + (ce.competence ? ' [' + ce.competence + ']' : '');
     if (ce.status === 'approved') list.push({ id: ce.id, summary: label, date: d, kind: 'approved' });
     else if (ce.status === 'pending' && currentUser && ce.proposedBy === currentUser.email) list.push({ id: ce.id, summary: label, date: d, kind: 'pending' });
   });
   Object.keys(userValidation).forEach(k => {
     const v = userValidation[k];
-    if (v.date && v.date.replace(/-/g, '') >= today) list.push({ summary: 'Validation Finale : ' + COMPETENCES_DB[k].title, date: v.date.replace(/-/g, ''), kind: 'val' });
+    if (v.date && v.date.replace(/-/g, '') >= today) list.push({ summary: 'Validation ' + COMPETENCES_DB[k].title, date: v.date.replace(/-/g, ''), kind: 'val' });
   });
   list.sort((a, b) => a.date.localeCompare(b.date));
   $('eventCountBadge').textContent = list.length;
-  box.innerHTML = list.length ? '' : '<div class="text-center py-8 text-xs text-slate-400 bg-white border border-dashed rounded-xl shadow-sm"><i class="fa-solid fa-mug-hot text-xl mb-2 text-slate-300 block"></i>Aucune évaluation de prévue pour le moment.</div>';
-  const styles = { ics: ['bg-indigo-50 border-indigo-200 text-indigo-900', 'Détectée Auto', 'fa-robot'], 
-    approved: ['bg-emerald-50 border-emerald-200 text-emerald-900', 'Validée Admin', 'fa-certificate'],
-    pending: ['bg-amber-50 border-amber-200 text-amber-900', 'En attente', 'fa-hourglass-half'], 
-    val: ['bg-rose-50 border-rose-200 text-rose-900', 'Ma Soutenance', 'fa-graduation-cap'] };
+  box.innerHTML = list.length ? '' : '<div class="text-center py-6 text-xs text-slate-400 border border-dashed rounded-xl">Aucune évaluation à venir.</div>';
+  const styles = { ics: ['bg-red-50 border-red-200', 'Évaluation détectée'], approved: ['bg-emerald-50 border-emerald-200', 'Validée admin'],
+    pending: ['bg-amber-50 border-amber-200', 'En attente admin'], val: ['bg-amber-50 border-amber-200', 'Ma validation'] };
   list.forEach(ev => {
-    const [cls, badge, icon] = styles[ev.kind];
-    const del = ev.kind === 'approved' && isAdmin() ? `<button onclick="deleteAdminEvaluation('${esc(ev.id)}')" class="ml-2 text-red-600 bg-white px-2 py-1 rounded shadow-sm hover:bg-red-50 transition"><i class="fa-solid fa-trash-can"></i></button>` : '';
+    const [cls, badge] = styles[ev.kind];
+    const del = ev.kind === 'approved' && isAdmin() ? `<button onclick="deleteAdminEvaluation('${esc(ev.id)}')" class="ml-2 text-red-600"><i class="fa-solid fa-trash-can"></i></button>` : '';
     const d = document.createElement('div');
-    d.className = 'p-3.5 rounded-xl border flex items-center justify-between text-xs shadow-sm transition hover:shadow-md ' + cls;
-    d.innerHTML = `<div><div class="font-bold text-sm mb-1">${esc(ev.summary)}</div>
-      <div class="text-[11px] opacity-75 font-semibold"><i class="fa-regular fa-calendar mr-1"></i>${ev.date.substring(6, 8)}/${ev.date.substring(4, 6)}/${ev.date.substring(0, 4)}</div></div>
-      <div class="flex items-center gap-2"><span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/60 border border-white/50 shadow-sm whitespace-nowrap"><i class="fa-solid ${icon} mr-1"></i>${badge}</span>${del}</div>`;
+    d.className = 'p-3 rounded-xl border flex items-center justify-between text-xs ' + cls;
+    d.innerHTML = `<div><div class="font-bold">${esc(ev.summary)}</div>
+      <div class="text-[10px] text-slate-500">${ev.date.substring(6, 8)}/${ev.date.substring(4, 6)}/${ev.date.substring(0, 4)}</div></div>
+      <div><span class="text-[10px] font-bold px-2 py-1 rounded-full bg-white border">${badge}</span>${del}</div>`;
     box.appendChild(d);
   });
 }
