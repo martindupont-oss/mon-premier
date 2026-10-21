@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICAM - Suivi des Compétences & Administration</title>
+    <title>ICAM - Suivi des Compétences & Détection Évaluations</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -65,14 +65,14 @@
         </div>
     </div>
 
-    <!-- Barre de Navigation -->
+    <!-- Navigation -->
     <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
                 <div class="bg-icam-red text-white px-3 py-1.5 rounded-lg font-black text-xl tracking-wider">ICAM</div>
                 <div>
-                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Administration</h1>
-                    <p class="text-xs text-slate-400">Google Drive • PDF • Planning</p>
+                    <h1 class="font-bold text-base sm:text-lg leading-tight">Suivi Compétences & Planning</h1>
+                    <p class="text-xs text-slate-400">Google Calendar • PDF • Hyperplanning</p>
                 </div>
             </div>
 
@@ -239,21 +239,21 @@
             </div>
         </section>
 
-        <!-- ONGLET 2 : PLANNING -->
+        <!-- ONGLET 2 : PLANNING & DÉTECTION ÉVALUATIONS -->
         <section id="secPlanning" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div>
-                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-calendar-days text-icam-red mr-2"></i>Planning & Synchronisation</h2>
-                <p class="text-xs text-slate-500 mt-1">Importe ton fichier `.ics` de cours ou consulte tes échéances.</p>
+                <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-calendar-days text-icam-red mr-2"></i>Planning & Détection d'Évaluations</h2>
+                <p class="text-xs text-slate-500 mt-1">Importe ton calendrier Google ICAM ou Hyperplanning pour détecter automatiquement tes contrôles et examens.</p>
             </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-file-arrow-up mr-1.5 text-emerald-600"></i>Importer un fichier `.ics` (Hyperplanning)</h3>
+                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-file-arrow-up mr-1.5 text-emerald-600"></i>Importer un fichier `.ics` (Google / Hyperplanning)</h3>
                     <input type="file" id="icsFileInput" accept=".ics" onchange="importIcsFile(event)" class="text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300 cursor-pointer">
                 </div>
 
                 <div>
-                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-link mr-1.5 text-blue-600"></i>Lien d'abonnement iCal</h3>
+                    <h3 class="text-xs font-bold text-slate-700 uppercase mb-2"><i class="fa-solid fa-link mr-1.5 text-blue-600"></i>Lien d'abonnement iCal direct</h3>
                     <div class="flex gap-2">
                         <input type="url" id="icalUrlInput" placeholder="https://..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-icam-red">
                         <button onclick="importIcalUrl()" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-700">Synchroniser</button>
@@ -263,7 +263,7 @@
 
             <div>
                 <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
-                    <span><i class="fa-solid fa-list-check mr-2 text-icam-red"></i>Évaluations & Devoirs</span>
+                    <span><i class="fa-solid fa-list-check mr-2 text-icam-red"></i>Évaluations & Devoirs à venir</span>
                     <span id="eventCountBadge" class="bg-red-100 text-icam-red text-xs px-2 py-0.5 rounded-full font-bold">0 événement</span>
                 </h3>
 
@@ -313,7 +313,7 @@
         // Liste des adresses email autorisées comme administrateurs
         const ADMIN_EMAILS = [
             "martin.dupont@2031.icam.fr",
-            "coadmin.exemple@2031.icam.fr", // <--- Ajoute les adresses des co-admins ici
+            // "coadmin.exemple@2031.icam.fr",
         ];
 
         const COMPETENCES_DB = {
@@ -709,20 +709,34 @@
             let currentEvent = null;
             importedEvents = [];
 
+            // Mots-clés pour repérer automatiquement les examens et évaluations
+            const evalKeywords = ['eval', 'évaluation', 'evaluation', 'examen', 'ds', 'partiel', 'soutenance', 'contrôle', 'controle', 'qcm', 'tp', 'test'];
+
             lines.forEach(line => {
                 if (line.startsWith('BEGIN:VEVENT')) {
                     currentEvent = {};
                 } else if (line.startsWith('END:VEVENT')) {
-                    if (currentEvent && currentEvent.summary) importedEvents.push(currentEvent);
+                    if (currentEvent && currentEvent.summary) {
+                        const titleLower = currentEvent.summary.toLowerCase();
+                        currentEvent.isEval = evalKeywords.some(kw => titleLower.includes(kw));
+                        importedEvents.push(currentEvent);
+                    }
                     currentEvent = null;
                 } else if (currentEvent) {
-                    if (line.startsWith('SUMMARY:')) currentEvent.summary = line.replace('SUMMARY:', '');
-                    if (line.startsWith('DTSTART:')) currentEvent.date = line.replace('DTSTART:', '').substring(0, 8);
+                    if (line.startsWith('SUMMARY:')) {
+                        currentEvent.summary = line.replace('SUMMARY:', '').trim();
+                    }
+                    if (line.startsWith('DTSTART:')) {
+                        currentEvent.date = line.replace('DTSTART:', '').substring(0, 8);
+                    }
                 }
             });
 
+            importedEvents.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
             renderEventsList();
-            alert(`${importedEvents.length} événements importés !`);
+
+            const evalCount = importedEvents.filter(e => e.isEval).length;
+            alert(`${importedEvents.length} événements importés, dont ${evalCount} évaluation(s) détectée(s) !`);
         }
 
         function renderEventsList() {
@@ -755,19 +769,37 @@
             list.forEach(ev => {
                 const formattedDate = ev.date ? `${ev.date.substring(6,8)}/${ev.date.substring(4,6)}/${ev.date.substring(0,4)}` : "Date non précisée";
                 const div = document.createElement('div');
-                div.className = `p-3 rounded-xl border flex items-center justify-between text-xs ${ev.isValidation ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'}`;
+                
+                let badgeText = "Cours";
+                let badgeClass = "bg-slate-100 text-slate-600";
+                let bgClass = "bg-white border-slate-200";
+                let iconClass = "fa-graduation-cap text-blue-600 bg-blue-100";
+
+                if (ev.isValidation) {
+                    badgeText = "Validation ICAM";
+                    badgeClass = "bg-amber-200 text-amber-900 font-bold";
+                    bgClass = "bg-amber-50 border-amber-200";
+                    iconClass = "fa-award text-amber-800 bg-amber-200";
+                } else if (ev.isEval) {
+                    badgeText = "⚠️ Évaluation détectée";
+                    badgeClass = "bg-red-100 text-red-700 font-bold border border-red-200";
+                    bgClass = "bg-red-50/50 border-red-200";
+                    iconClass = "fa-triangle-exclamation text-red-600 bg-red-100";
+                }
+
+                div.className = `p-3 rounded-xl border flex items-center justify-between text-xs ${bgClass}`;
                 div.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <div class="p-2 rounded-lg ${ev.isValidation ? 'bg-amber-200 text-amber-800' : 'bg-blue-100 text-blue-600'}">
-                            <i class="fa-solid ${ev.isValidation ? 'fa-award' : 'fa-graduation-cap'}"></i>
+                        <div class="p-2 rounded-lg ${iconClass}">
+                            <i class="fa-solid ${ev.isValidation ? 'fa-award' : (ev.isEval ? 'fa-pen-ruler' : 'fa-graduation-cap')}"></i>
                         </div>
                         <div>
                             <div class="font-bold text-slate-800">${ev.summary}</div>
                             <div class="text-[10px] text-slate-500"><i class="fa-regular fa-clock mr-1"></i>${formattedDate}</div>
                         </div>
                     </div>
-                    <span class="text-[10px] px-2 py-1 rounded-full font-bold ${ev.isValidation ? 'bg-amber-200 text-amber-900' : 'bg-slate-100 text-slate-600'}">
-                        ${ev.isValidation ? 'Validation ICAM' : 'Examen/Cours'}
+                    <span class="text-[10px] px-2 py-1 rounded-full ${badgeClass}">
+                        ${badgeText}
                     </span>
                 `;
                 container.appendChild(div);
