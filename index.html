@@ -465,6 +465,21 @@ function selectComp(k) {
   $('compTitle').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+// Au retour sur cet onglet (après la synchro sur PITCH), les scores se rafraîchissent tout seuls
+let lastAutoRefresh = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && currentUser && Date.now() - lastAutoRefresh > 15000) {
+    lastAutoRefresh = Date.now();
+    refreshFromServer(true);
+  }
+});
+
+function daysLabel(d) {
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  const n = Math.round((new Date(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8)) - t) / 86400000);
+  return n <= 0 ? "aujourd'hui" : n === 1 ? 'demain' : 'dans ' + n + ' jours';
+}
+
 function goToAgendaGuide() {
   switchTab('Sync');
   $('guideAgenda').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -546,7 +561,8 @@ async function refreshFromServer(silent) {
       if (me.validation) userValidation = { ...me.validation, ...userValidation };
       $('syncDebug').textContent = JSON.stringify(me.scores || {}, null, 2);
       $('syncStatus').textContent = 'Dernière lecture serveur : ' + new Date().toLocaleTimeString() +
-        ' — ' + Object.keys(me.scores || {}).length + ' RA reçus (' + Object.values(me.scores || {}).filter(v => Number(v) >= 0).length + ' évalués).';
+        ' — ' + Object.keys(me.scores || {}).length + ' RA reçus (' + Object.values(me.scores || {}).filter(v => Number(v) >= 0).length + ' évalués).' +
+        (me.updatedAt ? ' Dernière mise à jour des données : ' + new Date(me.updatedAt).toLocaleString('fr-FR') + '.' : '');
     } else {
       $('syncStatus').textContent = 'Aucune donnée serveur pour ' + currentUser.email +
         ". Vérifie que l'email saisi dans l'extension est exactement le même.";
@@ -850,7 +866,7 @@ function renderEventsList() {
     const d = document.createElement('div');
     d.className = 'p-3 rounded-xl border flex items-center justify-between text-xs ' + cls;
     d.innerHTML = `<div><div class="font-bold">${esc(ev.summary)}</div>
-      <div class="text-[10px] text-slate-500">${ev.date.substring(6, 8)}/${ev.date.substring(4, 6)}/${ev.date.substring(0, 4)}</div></div>
+      <div class="text-[10px] text-slate-500">${ev.date.substring(6, 8)}/${ev.date.substring(4, 6)}/${ev.date.substring(0, 4)} · <b>${daysLabel(ev.date)}</b></div></div>
       <div><span class="text-[10px] font-bold px-2 py-1 rounded-full bg-white border">${badge}</span>${del}</div>`;
     box.appendChild(d);
   });
