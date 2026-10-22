@@ -112,6 +112,7 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
         </div>
         <div id="compBigBar"></div>
         <div id="raListContainer" class="space-y-2"></div>
+        <p class="text-[11px] text-slate-400"><i class="fa-solid fa-lock mr-1"></i>Pourcentages en lecture seule : ils viennent uniquement de PITCH (extension de synchro).</p>
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2">
           <h4 class="text-xs font-bold text-blue-900 uppercase">Fiche de révision (PDF / Drive)</h4>
@@ -539,7 +540,8 @@ function updateUserHeader() {
 
 // Charge le local PUIS le serveur (le serveur gagne : scores venant de PITCH)
 async function loadUserData() {
-  const s = localStorage.getItem('icam_scores_' + currentUser.email);
+  localStorage.removeItem('icam_scores_' + currentUser.email); // ancien cache pouvant contenir des valeurs modifiées à la main
+  const s = localStorage.getItem('icam_srv_scores_' + currentUser.email);
   const v = localStorage.getItem('icam_val_' + currentUser.email);
   userScores = s ? JSON.parse(s) : {};
   userValidation = v ? JSON.parse(v) : {};
@@ -554,11 +556,7 @@ async function refreshFromServer(silent) {
     const db = await res.json();
     const me = db[currentUser.email];
     if (me) {
-      if (me.scores) Object.keys(me.scores).forEach(k => {
-        const v = Number(me.scores[k]);
-        if (v < 0 && isEvaluated(k)) return; // PITCH n'a rien : on garde la saisie manuelle
-        userScores[k] = v;
-      });
+      userScores = { ...(me.scores || {}) }; // lecture seule : seules les données PITCH du serveur font foi
       if (me.validation) userValidation = { ...me.validation, ...userValidation };
       $('syncDebug').textContent = JSON.stringify(me.scores || {}, null, 2);
       $('syncStatus').textContent = 'Dernière lecture serveur : ' + new Date().toLocaleTimeString() +
@@ -572,7 +570,7 @@ async function refreshFromServer(silent) {
   } catch (e) {
     $('syncStatus').textContent = 'Serveur injoignable : ' + e.message;
   }
-  localStorage.setItem('icam_scores_' + currentUser.email, JSON.stringify(userScores));
+  localStorage.setItem('icam_srv_scores_' + currentUser.email, JSON.stringify(userScores));
   renderCompetenceDetails();
   updateGlobalStats();
   renderEventsList();
@@ -582,7 +580,7 @@ async function refreshFromServer(silent) {
 // Sauvegarde seulement quand l'utilisateur modifie quelque chose
 function saveUserData() {
   if (!currentUser) return;
-  localStorage.setItem('icam_scores_' + currentUser.email, JSON.stringify(userScores));
+  localStorage.setItem('icam_srv_scores_' + currentUser.email, JSON.stringify(userScores));
   localStorage.setItem('icam_val_' + currentUser.email, JSON.stringify(userValidation));
   fetch('/api/save', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -607,7 +605,7 @@ function renderCompetenceDetails() {
     d.className = 'bg-white p-2.5 rounded-lg border flex items-center justify-between';
     d.innerHTML = `<span class="font-mono text-xs font-bold">${esc(ra)}</span>
       <div class="flex items-center gap-3">
-        <input type="range" min="0" max="100" step="5" value="${score}" oninput="updateRaScore('${esc(ra)}', this.value)" class="w-28 accent-red-600">
+        <div class="w-28 h-2.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full rounded-full ${barColor(ev ? score : null)}" style="width:${score}%"></div></div>
         <span class="text-xs font-bold w-16 text-right ${ev ? '' : 'text-slate-400 font-normal'}" id="val_${esc(ra)}">${ev ? fmt(score) + '%' : 'non évalué'}</span>
       </div>`;
     box.appendChild(d);
@@ -620,15 +618,6 @@ function renderCompetenceDetails() {
   $('valRevisionPdf').value = vd.revisionPdf || '';
   renderRadar(key);
   renderBigBar(key);
-  renderCompBars();
-}
-
-function updateRaScore(ra, value) {
-  userScores[ra] = parseInt(value);
-  const sp = $('val_' + ra); sp.textContent = value + '%'; sp.className = 'text-xs font-bold w-16 text-right';
-  saveUserData();
-  renderRadar($('competenceSelect').value);
-  renderBigBar($('competenceSelect').value);
   renderCompBars();
 }
 
