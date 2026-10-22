@@ -270,14 +270,18 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
   <!-- Promo -->
   <section id="secClassement" class="hidden bg-white rounded-xl border p-4 sm:p-6">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-bold">Promotion</h3>
+      <h3 class="text-lg font-bold">Classement de la promo</h3>
       <button onclick="renderClassTable()" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg font-semibold">Actualiser</button>
     </div>
+    <label class="flex items-start gap-3 p-3 rounded-xl border bg-slate-50 mb-4 cursor-pointer">
+      <input type="checkbox" id="shareToggle" onchange="setShareRanking(this.checked)" class="mt-1 w-4 h-4 accent-red-600">
+      <span class="text-sm"><b>Partager mon résultat avec la promo</b><br>
+        <span class="text-xs text-slate-500">Coché : ton nom, ta moyenne RA et tes compétences validées apparaissent dans le classement. Décoché (par défaut) : seuls toi et les admins les voient. Tu peux changer d'avis à tout moment.</span></span>
+    </label>
+    <p id="classInfo" class="text-xs text-slate-500 mb-3"></p>
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs">
-        <thead><tr class="bg-slate-50 text-slate-500">
-          <th class="p-3">Élève</th><th class="p-3">Email</th><th class="p-3">Promo</th><th class="p-3">Moyenne RA</th><th class="p-3">Validées</th><th class="p-3 text-right">Admin</th>
-        </tr></thead>
+        <thead id="classTableHead"></thead>
         <tbody id="classTableBody" class="divide-y"></tbody>
       </table>
     </div>
@@ -674,28 +678,55 @@ function updateGlobalStats() {
   $('validatedCount').textContent = n + ' / 13';
 }
 
+// Choix de partage : stocké dans validation.__privacy (déjà sauvegardé par /api/save)
+const isShared = st => !!(st.validation && st.validation.__privacy && st.validation.__privacy.share);
+
+function setShareRanking(on) {
+  userValidation.__privacy = { share: !!on };
+  saveUserData();
+  renderClassTable();
+}
+
 function renderClassTable() {
-  const tb = $('classTableBody');
-  tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Chargement...</td></tr>';
+  if (!currentUser) return;
+  const tb = $('classTableBody'), admin = isAdmin(), cols = admin ? 7 : 5;
+  $('shareToggle').checked = !!(userValidation.__privacy && userValidation.__privacy.share);
+  $('classTableHead').innerHTML = '<tr class="bg-slate-50 text-slate-500"><th class="p-3">Rang</th><th class="p-3">Élève</th><th class="p-3">Promo</th><th class="p-3">Moyenne RA</th><th class="p-3">Validées</th>' +
+    (admin ? '<th class="p-3">Visibilité</th><th class="p-3 text-right">Admin</th>' : '') + '</tr>';
+  tb.innerHTML = `<tr><td colspan="${cols}" class="p-4 text-center text-slate-400">Chargement...</td></tr>`;
   fetch('/api/students').then(r => r.json()).then(db => {
+    const rows = Object.keys(db).map(e => {
+      const st = db[e]; st.email = st.email || e;
+      return { st, avg: overallAvg(st.scores || {}), val: Object.values(st.validation || {}).filter(v => v && v.status === 'Validé').length,
+               shared: isShared(st), me: currentUser.email === st.email };
+    });
+    $('totalStudentsCount').textContent = rows.length || 1;
+    // Élève : on ne voit que ceux qui partagent (+ soi-même). Admin : tout le monde.
+    const list = rows.filter(r => admin || r.shared || r.me);
+    list.sort((a, b) => b.avg - a.avg || b.val - a.val);
+    let rank = 0;
+    list.forEach((r, i) => { if (i === 0 || r.avg !== list[i - 1].avg || r.val !== list[i - 1].val) rank = i + 1; r.rank = rank; });
+    const nShared = rows.filter(r => r.shared).length, mine = list.find(r => r.me);
+    $('classInfo').textContent = admin
+      ? `Vue admin : ${rows.length} élève(s), dont ${nShared} qui partage(nt) leur résultat.`
+      : `${nShared} élève(s) sur ${rows.length} partagent leur résultat.` + (mine ? ` Ta place parmi ceux qui partagent : ${mine.rank}${mine.rank === 1 ? 'er' : 'e'}${mine.shared ? '' : ' (visible par toi seul)'}.` : '');
+    if (!list.length) { tb.innerHTML = `<tr><td colspan="${cols}" class="p-4 text-center text-slate-400">Personne n'a encore partagé son résultat.</td></tr>`; return; }
     tb.innerHTML = '';
-    const emails = Object.keys(db);
-    $('totalStudentsCount').textContent = emails.length || 1;
-    if (!emails.length) { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Aucun élève.</td></tr>'; return; }
-    emails.forEach(e => {
-      const st = db[e], sc = st.scores || {}, k = Object.keys(sc).filter(x => Number(sc[x]) >= 0);
-      const avg = Math.round(overallAvg(sc));
-      const val = Object.values(st.validation || {}).filter(v => v.status === 'Validé').length;
-      const me = currentUser && currentUser.email === st.email;
-      const act = isAdmin() ? `<button data-email="${esc(st.email)}" onclick="deleteStudentByAdmin(this.dataset.email)" class="text-red-600 text-[11px] font-bold"><i class="fa-solid fa-trash-can"></i> Supprimer</button>` : '—';
+    const medal = ['🥇', '🥈', '🥉'];
+    list.forEach(r => {
+      const st = r.st;
+      const act = admin ? `<td class="p-3"><span class="${r.shared ? 'text-emerald-700' : 'text-slate-500'}">${r.shared ? '🌐 Public' : '🔒 Privé'}</span><div class="font-mono text-[10px] text-slate-400">${esc(st.email)}</div></td>
+        <td class="p-3 text-right"><button data-email="${esc(st.email)}" onclick="deleteStudentByAdmin(this.dataset.email)" class="text-red-600 text-[11px] font-bold"><i class="fa-solid fa-trash-can"></i> Supprimer</button></td>` : '';
       const tr = document.createElement('tr');
-      tr.className = me ? 'bg-emerald-50 font-semibold' : '';
-      tr.innerHTML = `<td class="p-3">${esc(st.name || 'Élève')}${me ? ' (vous)' : ''}</td><td class="p-3 font-mono text-[11px]">${esc(st.email)}</td>
-        <td class="p-3">${esc(st.promo || 'ICAM')}</td><td class="p-3 font-bold ${avg >= 70 ? 'text-emerald-600' : 'text-icam-red'}">${avg}%</td>
-        <td class="p-3">${val} / 13</td><td class="p-3 text-right">${act}</td>`;
+      tr.className = r.me ? 'bg-emerald-50 font-semibold' : '';
+      tr.innerHTML = `<td class="p-3 font-bold">${medal[r.rank - 1] || r.rank}</td>
+        <td class="p-3">${esc(st.name || 'Élève')}${r.me ? ' (vous)' : ''}${r.me && !r.shared ? ' <span class="text-[10px] font-normal text-slate-400">🔒 non partagé</span>' : ''}</td>
+        <td class="p-3">${esc(st.promo || 'ICAM')}</td>
+        <td class="p-3 font-bold ${r.avg >= 70 ? 'text-emerald-600' : 'text-icam-red'}">${fmt(r.avg)}%</td>
+        <td class="p-3">${r.val} / 13</td>${act}`;
       tb.appendChild(tr);
     });
-  }).catch(() => { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Erreur de chargement.</td></tr>'; });
+  }).catch(() => { tb.innerHTML = `<tr><td colspan="${cols}" class="p-4 text-center text-slate-400">Erreur de chargement.</td></tr>`; });
 }
 
 function deleteStudentByAdmin(target) {
