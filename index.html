@@ -373,6 +373,7 @@ const AGENDA_FILE = [
 ];
 
 const AGENDA_TROUBLES = [
+  "<b>J'ai un lien qui contient <code>/calendar/embed?src=…</code></b> : c'est un lien pour afficher l'agenda dans une page web, pas un fichier d'agenda. Colle-le quand même : le portail le convertit tout seul en lien iCal, mais ça ne marche que si l'agenda est <b>public</b>. Sinon, utilise l'adresse secrète au format iCal (Méthode 1).",
   "<b>« 0 évaluation détectée »</b> : seuls les événements <b>à venir</b> dont le titre contient un mot-clé (éval, examen, DS, partiel, soutenance, contrôle, QCM, test, rendu, pitch) sont gardés. Renomme tes événements en conséquence.",
   "<b>Message d'erreur après « OK »</b> : le lien est incomplet ou périmé. Il doit commencer par <code>https://</code> et finir par <code>.ics</code>. Recopie-le en entier, sans espace.",
   "<b>Je ne trouve pas « Intégrer l'agenda »</b> : tu es peut-être sur l'appli mobile, ou sur un agenda dont tu n'es pas propriétaire. Utilise un ordinateur, ou demande le lien à la personne qui gère l'agenda.",
@@ -758,7 +759,7 @@ function proposeStudentEvaluation(e) {
         $('propEvalTitle').value = ''; $('propEvalDate').value = '';
         selectedPropRAs.clear(); renderPropRACheckboxes(); renderBadges(); loadCustomEvaluations();
         alert("Proposition envoyée, en attente de validation d'un admin.");
-      } else alert('Erreur : ' + d.message);
+      } else alert('Erreur : ' + d.message + (converted ? "\n\nTon lien a été converti automatiquement. Il ne fonctionne que si l'agenda est PUBLIC (Google Agenda > Paramètres de l'agenda > Autorisations d'accès > « Rendre disponible publiquement »). Sinon utilise l'adresse secrète au format iCal." : ''));
     });
 }
 
@@ -789,9 +790,21 @@ function renderPending() {
 }
 
 /* ---- Calendrier ---- */
+// Un lien Google "embed" (…/calendar/embed?src=…) est converti en lien iCal public (…/ical/…/public/basic.ics)
+function normalizeCalUrl(u) {
+  try {
+    const x = new URL(u), src = x.searchParams.get('src');
+    if (x.hostname === 'calendar.google.com' && x.pathname.includes('/embed') && src)
+      return 'https://calendar.google.com/calendar/ical/' + encodeURIComponent(src) + '/public/basic.ics';
+  } catch (e) {}
+  return u;
+}
+
 function importIcalUrl() {
-  const url = $('icalUrlInput').value.trim();
-  if (!url) return alert('Colle un lien.');
+  const raw = $('icalUrlInput').value.trim();
+  if (!raw) return alert('Colle un lien.');
+  const url = normalizeCalUrl(raw), converted = url !== raw;
+  $('icalUrlInput').value = url;
   fetch('/api/fetch-ical', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) })
     .then(r => r.json()).then(d => {
       if (d.status === 'success') {
