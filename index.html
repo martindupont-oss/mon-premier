@@ -88,7 +88,7 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
     <div class="pb-5 mb-5 border-b">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <h3 class="text-sm font-bold uppercase text-slate-500">Ma progression par compétence</h3>
-        <span class="text-[11px] text-slate-400">Clique sur une barre pour ouvrir la compétence · trait blanc = objectif 70 %</span>
+        <span class="text-[11px] text-slate-400">Clique sur une barre pour ouvrir la compétence · trait blanc = objectif 70 % · RA non évalué = 0, comme sur PITCH</span>
       </div>
       <div id="compBars" class="grid sm:grid-cols-2 gap-x-8 gap-y-4"></div>
     </div>
@@ -407,15 +407,30 @@ function getRAs(key) {
 
 function compStats(key) {
   const ras = getRAs(key), ev = ras.filter(isEvaluated);
-  const avg = ev.length ? ev.reduce((s, r) => s + Number(userScores[r]), 0) / ev.length : null;
+  // Comme PITCH : somme des scores / nombre TOTAL de RA (un RA non évalué compte pour 0)
+  const avg = ras.length ? ev.reduce((s, r) => s + Number(userScores[r]), 0) / ras.length : null;
   return { avg, done: ev.length, total: ras.length };
+}
+
+// Affichage comme PITCH : jusqu'à 2 décimales (24.32%), sans zéros inutiles
+const fmt = v => String(Math.round(Number(v) * 100) / 100);
+
+// Moyenne globale d'un élève : tous les RA connus (liste codée en dur + RA reçus de PITCH), non évalué = 0
+function overallAvg(scores) {
+  const all = new Set();
+  Object.values(COMPETENCES_DB).forEach(c => c.ras.forEach(r => all.add(r)));
+  Object.keys(scores || {}).forEach(k => { if (k.toUpperCase().startsWith('RA-')) all.add(k.toUpperCase()); });
+  if (!all.size) return 0;
+  let sum = 0;
+  all.forEach(r => { const v = Number((scores || {})[r]); if (v >= 0) sum += v; });
+  return sum / all.size;
 }
 
 const barColor = v => v === null ? 'bg-slate-300' : v >= 70 ? 'bg-emerald-500' : v >= 40 ? 'bg-amber-500' : 'bg-icam-red';
 
 function barHtml(st, h, big) {
-  const pct = st.avg === null ? 0 : Math.round(st.avg);
-  const label = st.avg === null ? '—' : pct + '%';
+  const pct = st.avg === null ? 0 : st.avg;
+  const label = st.avg === null ? '—' : fmt(st.avg) + '%';
   return `<div class="relative ${h} bg-slate-200 rounded-full overflow-hidden">
       <div class="h-full rounded-full ${barColor(st.avg)} transition-all duration-500" style="width:${pct}%"></div>
       <div class="absolute top-0 bottom-0 w-0.5 bg-white/90" style="left:70%"></div>
@@ -426,7 +441,7 @@ function barHtml(st, h, big) {
 function renderCompBars() {
   const cur = $('competenceSelect').value;
   $('compBars').innerHTML = Object.keys(COMPETENCES_DB).map(k => {
-    const st = compStats(k), pct = st.avg === null ? '—' : Math.round(st.avg) + '%';
+    const st = compStats(k), pct = st.avg === null ? '—' : fmt(st.avg) + '%';
     const short = COMPETENCES_DB[k].title.replace(/^C\d+\s*:\s*/, '');
     return `<button type="button" onclick="selectComp('${k}')" class="text-left rounded-xl p-2 -m-2 hover:bg-slate-50 ${k === cur ? 'ring-2 ring-red-300 bg-red-50/40' : ''}">
       <div class="flex items-baseline justify-between gap-2 mb-1">
@@ -570,13 +585,13 @@ function renderCompetenceDetails() {
   const ras = getRAs(key);
   box.innerHTML = ras.length ? '' : '<p class="text-xs text-slate-400 italic">Aucun RA connu pour cette compétence. Relance la synchro PITCH (extension 2.1) : ses RA seront ajoutés automatiquement.</p>';
   ras.forEach(ra => {
-    const ev = isEvaluated(ra), score = ev ? Math.round(userScores[ra]) : 0;
+    const ev = isEvaluated(ra), score = ev ? Number(userScores[ra]) : 0;
     const d = document.createElement('div');
     d.className = 'bg-white p-2.5 rounded-lg border flex items-center justify-between';
     d.innerHTML = `<span class="font-mono text-xs font-bold">${esc(ra)}</span>
       <div class="flex items-center gap-3">
         <input type="range" min="0" max="100" step="5" value="${score}" oninput="updateRaScore('${esc(ra)}', this.value)" class="w-28 accent-red-600">
-        <span class="text-xs font-bold w-16 text-right ${ev ? '' : 'text-slate-400 font-normal'}" id="val_${esc(ra)}">${ev ? score + '%' : 'non évalué'}</span>
+        <span class="text-xs font-bold w-16 text-right ${ev ? '' : 'text-slate-400 font-normal'}" id="val_${esc(ra)}">${ev ? fmt(score) + '%' : 'non évalué'}</span>
       </div>`;
     box.appendChild(d);
   });
@@ -641,7 +656,7 @@ function updateGlobalStats() {
   $('raCount').textContent = keys.length;
   const b = $('targetBadge70');
   if (keys.length) {
-    const avg = Math.round(keys.reduce((t, k) => t + Number(userScores[k]), 0) / keys.length);
+    const avg = Math.round(overallAvg(userScores));
     $('userOverallScore').textContent = avg + '%';
     b.textContent = avg >= 70 ? '🟢 Au-dessus de 70%' : '🔴 Sous 70%';
     b.className = 'text-[10px] font-bold mt-1 px-2 py-0.5 rounded-full inline-block ' + (avg >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800');
@@ -663,7 +678,7 @@ function renderClassTable() {
     if (!emails.length) { tb.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Aucun élève.</td></tr>'; return; }
     emails.forEach(e => {
       const st = db[e], sc = st.scores || {}, k = Object.keys(sc).filter(x => Number(sc[x]) >= 0);
-      const avg = k.length ? Math.round(k.reduce((s, x) => s + Number(sc[x]), 0) / k.length) : 0;
+      const avg = Math.round(overallAvg(sc));
       const val = Object.values(st.validation || {}).filter(v => v.status === 'Validé').length;
       const me = currentUser && currentUser.email === st.email;
       const act = isAdmin() ? `<button data-email="${esc(st.email)}" onclick="deleteStudentByAdmin(this.dataset.email)" class="text-red-600 text-[11px] font-bold"><i class="fa-solid fa-trash-can"></i> Supprimer</button>` : '—';
