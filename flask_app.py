@@ -3,12 +3,14 @@ import os
 import urllib.parse
 import urllib.request
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__)
-DATA_FILE = "students_data.json"
-EVALS_FILE = "evaluations.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE_DIR, "students_data.json")
+EVALS_FILE = os.path.join(BASE_DIR, "evaluations.json")
+TITLES_FILE = os.path.join(BASE_DIR, "ra_titles.json")  # titres des RA lus sur PITCH (partagés)
 
 # Adresses autorisées comme administrateurs
 ADMIN_EMAILS = [
@@ -21,6 +23,7 @@ ADMIN_EMAILS = [
 def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Max-Age"] = "86400"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, DELETE"
     return response
 
@@ -47,9 +50,29 @@ def get_all_data():
             return {}
 
 
-def save_all_data(data):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
+def _write_json(path, data):
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+
+def save_all_data(data):
+    _write_json(DATA_FILE, data)
+
+
+def get_ra_titles():
+    if not os.path.exists(TITLES_FILE):
+        return {}
+    with open(TITLES_FILE, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except Exception:
+            return {}
+
+
+def save_ra_titles(titles):
+    _write_json(TITLES_FILE, titles)
 
 
 def get_custom_evals():
@@ -63,12 +86,11 @@ def get_custom_evals():
 
 
 def save_custom_evals(evals):
-    with open(EVALS_FILE, "w", encoding="utf-8") as f:
-        json.dump(evals, f, ensure_ascii=False, indent=2)
+    _write_json(EVALS_FILE, evals)
 
 
 def update_student_stats(student):
-    """Calcule automatiquement la moyenne, le nombre de RA acquis et la trajectoire 70%."""
+    """Moyenne, nombre de RA évalués et trajectoire. Un score -1 = RA connu mais non évalué."""
     scores = student.get("scores", {})
     clean_scores = {}
 
@@ -80,13 +102,12 @@ def update_student_stats(student):
             continue
 
     student["scores"] = clean_scores
-    total_ra = len(clean_scores)
+    evaluated = [v for v in clean_scores.values() if v >= 0]
+    total_ra = len(evaluated)
 
     if total_ra > 0:
-        sum_scores = sum(clean_scores.values())
-        acquired_70 = sum(1 for val in clean_scores.values() if val >= 70)
-
-        student["globalProgress"] = round(sum_scores / total_ra, 1)
+        acquired_70 = sum(1 for val in evaluated if val >= 70)
+        student["globalProgress"] = round(sum(evaluated) / total_ra, 1)
         student["acquiredCount"] = acquired_70
         student["totalRA"] = total_ra
         student["trajectoirePercent"] = round((acquired_70 / total_ra) * 100, 1)
@@ -103,37 +124,35 @@ def update_student_stats(student):
 @app.route("/")
 @app.route("/index.html")
 def home():
-    return send_from_directory(".", "index.html")
+    return send_from_directory(BASE_DIR, "index.html")
 
 
-@app.route("/api/save", methods=["POST"])
+@app.route("/api/save", methods=["POST", "OPTIONS"])
 def save_student():
-    payload = request.get_json() or {}
-    email = payload.get("email", "").strip().lower()
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"})
+
+    payload = request.get_json(silent=True) or {}
+    email = str(payload.get("email", "")).strip().lower()
 
     if not email:
         return jsonify({"status": "error", "message": "Email manquant"}), 400
 
-    payload["email"] = email
     db = get_all_data()
+    student = db.get(email, {"email": email, "scores": {}})
 
-    if email in db:
-        old_data = db[email]
-        if "scores" in old_data and "scores" in payload:
-            old_data["scores"].update(payload["scores"])
-            payload["scores"] = old_data["scores"]
+    # Seuls ces champs viennent du navigateur. Les scores, eux, ne viennent que de l'extension.
+    for field in ("name", "promo", "validation"):
+        if field in payload:
+            student[field] = payload[field]
+    student["email"] = email
+    student["savedAt"] = datetime.now(timezone.utc).isoformat()
 
-    student = update_student_stats(payload)
+    student = update_student_stats(student)
     db[email] = student
     save_all_data(db)
 
-    return jsonify(
-        {
-            "status": "success",
-            "message": "Sauvegardé avec succès",
-            "student": student,
-        }
-    )
+    return jsonify({"status": "success", "message": "Sauvegardé avec succès", "student": student})
 
 
 @app.route("/api/sync-pitch", methods=["POST", "OPTIONS"])
@@ -141,12 +160,15 @@ def sync_pitch():
     if request.method == "OPTIONS":
         return jsonify({"status": "ok"})
 
-    payload = request.get_json() or {}
-    email = payload.get("email", "").strip().lower()
+    payload = request.get_json(silent=True) or {}
+    email = str(payload.get("email", "")).strip().lower()
     scores = payload.get("scores", {})
+    titles = payload.get("titles", {})
 
     if not email:
         return jsonify({"status": "error", "message": "Email non détecté"}), 400
+    if not isinstance(scores, dict):
+        return jsonify({"status": "error", "message": "Format de scores invalide"}), 400
 
     db = get_all_data()
     student = db.get(
@@ -162,27 +184,63 @@ def sync_pitch():
     if "scores" not in student or not isinstance(student["scores"], dict):
         student["scores"] = {}
 
-    # Fusion des compétences reçues de l'extension
-    student["scores"].update(scores)
-    student["updatedAt"] = payload.get(
-        "updatedAt", datetime.utcnow().isoformat()
-    )
+    # Fusion : on ne garde que les codes RA-..., et "non évalué" (-1) n'écrase jamais un vrai score
+    accepted = 0
+    for code, value in scores.items():
+        code = str(code).strip().upper()
+        if not code.startswith("RA-"):
+            continue
+        try:
+            value = float(value)
+        except (ValueError, TypeError):
+            continue
+        old = student["scores"].get(code)
+        if value < 0 and old is not None and float(old) >= 0:
+            continue
+        student["scores"][code] = value
+        accepted += 1
 
-    # Recalcul des métriques globales
+    # Titres des RA (communs à tous les élèves, utilisés par la recherche du portail)
+    new_titles = 0
+    if isinstance(titles, dict) and titles:
+        all_titles = get_ra_titles()
+        for code, title in titles.items():
+            code = str(code).strip().upper()
+            if code.startswith("RA-") and isinstance(title, str) and title.strip():
+                if all_titles.get(code) != title.strip():
+                    all_titles[code] = title.strip()[:300]
+                    new_titles += 1
+        if new_titles:
+            save_ra_titles(all_titles)
+
+    now = datetime.now(timezone.utc).isoformat()
+    student["updatedAt"] = now
+    student["syncedAt"] = now
+    student["email"] = email
+
     student = update_student_stats(student)
-
     db[email] = student
     save_all_data(db)
 
     return jsonify(
         {
             "status": "success",
-            "message": f"Synchronisation réussie pour {email} ! {len(scores)} compétences importées.",
+            "message": f"Synchronisation réussie pour {email} : {accepted} RA reçus, {new_titles} titres mis à jour.",
             "totalRA": student["totalRA"],
             "globalProgress": student["globalProgress"],
             "trajectoirePercent": student["trajectoirePercent"],
         }
     )
+
+
+@app.route("/api/ra-titles", methods=["GET"])
+def ra_titles():
+    return jsonify(get_ra_titles())
+
+
+@app.route("/api/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "time": datetime.now(timezone.utc).isoformat()})
 
 
 @app.route("/api/students", methods=["GET"])
@@ -314,8 +372,6 @@ def fetch_ical():
 
     if not url:
         return jsonify({"status": "error", "message": "URL manquante"}), 400
-
-    url = url.replace("¶m=", "&param=").replace("¶", "&para")
 
     if url.startswith("webcal://"):
         url = "https://" + url[9:]
