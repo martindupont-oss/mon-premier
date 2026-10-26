@@ -85,6 +85,17 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
 
   <!-- Référentiel -->
   <section id="secReferentiel" class="bg-white rounded-xl border p-4 sm:p-6">
+    <div class="pb-5 mb-5 border-b relative">
+      <label for="compSearch" class="text-sm font-bold uppercase text-slate-500 block mb-2"><i class="fa-solid fa-magnifying-glass mr-1"></i>Rechercher une compétence ou un RA</label>
+      <div class="relative">
+        <input id="compSearch" type="search" autocomplete="off" oninput="runSearch()" onkeydown="searchKey(event)"
+          placeholder="Ex. : analyser le monde de l'entreprise, RA-MIA-C01-2, management, anglais…"
+          class="w-full pl-4 pr-10 py-3 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-300">
+        <button type="button" onclick="clearSearch()" id="compSearchClear" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700" title="Effacer">✕</button>
+      </div>
+      <div id="compSearchResults" class="hidden mt-2 border rounded-xl bg-white shadow-lg max-h-96 overflow-y-auto divide-y"></div>
+      <p id="searchHint" class="text-[11px] text-slate-400 mt-1">Tape plusieurs mots, l'ordre n'a pas d'importance, les accents sont ignorés. Raccourci : touche <kbd class="border rounded px-1">/</kbd>. Les titres des RA arrivent avec la synchro PITCH (extension v3).</p>
+    </div>
     <div class="pb-5 mb-5 border-b">
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <h3 class="text-sm font-bold uppercase text-slate-500">Ma progression par compétence</h3>
@@ -199,7 +210,7 @@ tailwind.config = { theme: { extend: { colors: { icam: { red: '#E30613' } } } } 
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="max-w-xl">
           <h2 class="text-xl font-bold">Synchro PITCH</h2>
-          <p class="text-sm text-slate-600 mt-1">Une petite extension navigateur lit ton avancement sur PITCH et l'envoie sur ce portail. Tu l'installes une seule fois, ensuite il suffit d'un clic.</p>
+          <p class="text-sm text-slate-600 mt-1">Une petite extension navigateur lit ton avancement sur PITCH (compétences, sous-compétences et titres) et l'envoie sur ce portail. Tu l'installes une seule fois, ensuite il suffit d'un clic.</p>
         </div>
         <button onclick="downloadExtension()" class="bg-icam-red hover:bg-red-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow">
           <i class="fa-solid fa-download mr-2"></i>Télécharger l'extension (.zip)
@@ -307,7 +318,7 @@ const COMPETENCES_DB = {
   "C13": { title: "C13 : Discerner ses désirs et valeurs", desc: "Recul sur sa pratique.", ras: [] }
 };
 
-let currentUser = null, userScores = {}, userValidation = {};
+let currentUser = null, userScores = {}, userValidation = {}, raTitles = {};
 let importedEvents = [], customEvals = [], selectedPropRAs = new Set(), radarChart = null;
 
 const $ = id => document.getElementById(id);
@@ -315,14 +326,14 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const isAdmin = () => currentUser && ADMIN_EMAILS.includes(currentUser.email);
 
 /* ---- Extension PITCH (zip embarqué : aucun fichier à héberger à côté) ---- */
-const EXT_ZIP_B64 = "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";
+const EXT_ZIP_B64 = "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";
 
 function downloadExtension() {
   const bin = atob(EXT_ZIP_B64), bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   const url = URL.createObjectURL(new Blob([bytes], { type: 'application/zip' }));
   const a = document.createElement('a');
-  a.href = url; a.download = 'pitch-sync-extension-v2.1.zip';
+  a.href = url; a.download = 'pitch-sync-extension-v3.zip';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
@@ -334,32 +345,36 @@ function copyText(text, btn) {
 }
 
 const PITCH_INSTALL = [
-  "<b>Télécharge</b> le fichier avec le bouton rouge ci-dessus (<code>pitch-sync-extension-v2.1.zip</code>).",
-  "<b>Décompresse-le</b> : sous Windows, clic droit sur le zip puis « Extraire tout… » ; sous Mac, double-clic. Tu obtiens un dossier <code>pitch-sync-extension</code> contenant 3 fichiers (<code>manifest.json</code>, <code>inject.js</code>, <code>content.js</code>). <b>Range-le à un endroit stable</b> (ex. Documents) : si tu le supprimes ou le déplaces, l'extension s'arrête.",
+  "<b>Télécharge</b> le fichier avec le bouton rouge ci-dessus (<code>pitch-sync-extension-v3.zip</code>).",
+  "<b>Décompresse-le</b> : sous Windows, clic droit sur le zip puis « Extraire tout… » ; sous Mac, double-clic. Tu obtiens un dossier qui contient <b>directement</b> les fichiers <code>manifest.json</code>, <code>content.js</code>, <code>inject.js</code>, <code>background.js</code>, <code>popup.html</code>… <b>Range ce dossier à un endroit stable</b> (ex. Documents) : si tu le supprimes ou le déplaces, l'extension s'arrête. <span class='text-slate-500'>Si Chrome dit « Le fichier manifeste est manquant ou illisible » : tu as choisi un dossier trop haut. Entre dans le dossier jusqu'à voir <code>manifest.json</code> et sélectionne celui-là.</span>",
   "Ouvre la page des extensions : tape <code>chrome://extensions</code> dans la barre d'adresse <button type='button' onclick=\"copyText('chrome://extensions', this)\" class='ml-1 text-[11px] bg-slate-100 hover:bg-slate-200 border px-2 py-0.5 rounded'>Copier</button> <span class='text-slate-500'>(Edge : <code>edge://extensions</code> · Brave : <code>brave://extensions</code>)</span>. Un lien cliquable ne marche pas, c'est une limite du navigateur : copie-colle l'adresse.",
-  "Active le <b>« Mode développeur »</b> (interrupteur en haut à droite de la page).",
-  "Clique sur <b>« Charger l'extension non empaquetée »</b> (en haut à gauche ; sur Edge : « Charger l'extension décompressée »), puis sélectionne le dossier <code>pitch-sync-extension</code>. <b>Attention :</b> choisis le dossier qui contient directement <code>manifest.json</code>, pas le .zip, pas un dossier parent.",
-  "« ICAM PITCH Sync » apparaît dans la liste avec son interrupteur activé. ✅ C'est installé. <span class='text-slate-500'>(Optionnel : icône puzzle 🧩 en haut à droite de Chrome, puis l'épingle.)</span>"
+  "Si tu avais une ancienne version (v1, v2…), clique sur <b>« Supprimer »</b> sur sa carte. Puis active le <b>« Mode développeur »</b> (interrupteur en haut à droite de la page).",
+  "Clique sur <b>« Charger l'extension non empaquetée »</b> (en haut à gauche ; sur Edge : « Charger l'extension décompressée »), puis sélectionne le dossier qui contient <code>manifest.json</code>. <b>Pas le .zip.</b> Il faut Chrome 111 ou plus récent.",
+  "« ICAM PITCH Sync 3.0 » apparaît dans la liste, interrupteur activé. ✅ C'est installé. <b>Pour l'ouvrir :</b> clique sur l'icône puzzle 🧩 en haut à droite de Chrome, puis sur « ICAM PITCH Sync » (épingle-la 📌 pour l'avoir toujours sous la main). Le menu s'ouvre."
 ];
 
 const PITCH_USE = [
-  "Va sur <b>PITCH</b> (<code>pitch-icam.rima1.fr</code>) et connecte-toi comme d'habitude. Si l'onglet était déjà ouvert avant l'installation, fais <b>F5</b>.",
-  "Ouvre tes compétences et <b>clique sur une compétence (ex. C01)</b>. C'est indispensable : ça force PITCH à charger les RA, et l'extension s'en sert pour aller lire les 13 blocs C01 à C13.",
-  "Un bouton rouge <b>« ⚡ Synchro vers mon portail »</b> est en bas à droite de la page PITCH. Clique dessus.",
-  "Saisis <b>exactement le même email</b> que celui de ce portail (ex. <code>nom.prenom@2031.icam.fr</code>). Il est mémorisé pour les fois suivantes.",
-  "Attends quelques secondes. Un message ✅ t'indique combien de RA ont été envoyés (les RA « non évalués » dans PITCH sont ignorés, c'est normal).",
-  "Reviens ici et clique sur <b>« Rafraîchir mes scores »</b> en bas de cette section. Tes RA apparaissent dans le Référentiel, et ta moyenne dans la Promo."
+  "Va sur <b>PITCH</b> (<code>pitch-icam.rima1.fr</code>) et connecte-toi comme d'habitude. <b>Fais F5</b> si l'onglet était déjà ouvert avant l'installation : l'extension doit être là avant que PITCH charge ses données.",
+  "Clique sur l'icône de l'extension 🧩 (ou sur le bouton rouge <b>« ⚡ Synchro vers mon portail »</b> en bas à droite de PITCH). Dans le menu, saisis <b>exactement le même email</b> que celui de ce portail (ex. <code>nom.prenom@2031.icam.fr</code>) : il est mémorisé.",
+  "Clique sur <b>« 1 · Ouvrir toutes les sous-compétences »</b> : l'extension déplie les accordéons de PITCH pour afficher le détail sous chaque grande compétence. <span class='text-slate-500'>(Facultatif : les RA sont lus directement dans les données de PITCH, même repliés.)</span>",
+  "Clique sur <b>« 2 · Synchroniser avec mon portail »</b>. L'extension lit les 13 compétences C01 à C13, avec leurs sous-compétences (RA) et leurs titres, puis les envoie ici. Compte 10 à 30 secondes. Si PITCH n'a encore rien chargé, elle clique toute seule sur une compétence pour le forcer.",
+  "Un ✅ t'indique combien de RA ont été envoyés. Les RA « non évalués » sont envoyés comme tels (ils comptent pour 0 dans la moyenne, comme sur PITCH).",
+  "Reviens ici et clique sur <b>« Rafraîchir mes scores »</b> en bas de cette section. Tes RA apparaissent dans le Référentiel, et tu peux les <b>rechercher par leur nom</b> (ex. « analyser le monde de l'entreprise »)."
 ];
 
 const PITCH_TROUBLES = [
-  "<b>Je ne vois pas le bouton rouge</b> : vérifie que l'extension est activée dans <code>chrome://extensions</code>, que tu es bien sur <code>https://pitch-icam.rima1.fr</code>, puis fais F5.",
-  "<b>« Pas de réponse de la page »</b> : fais F5 sur PITCH et recommence.",
-  "<b>« Aucun avancement trouvé »</b> : F5, clique sur une compétence (ex. C01), attends que ses RA s'affichent, puis relance la synchro.",
-  "<b>Le portail dit « Aucune donnée serveur pour… »</b> : l'email saisi dans l'extension n'est pas le même que celui du portail. Relance la synchro et corrige-le dans la fenêtre qui s'ouvre.",
+  "<b>Chrome refuse de charger l'extension (« manifeste manquant ») :</b> le dossier sélectionné ne contient pas directement <code>manifest.json</code>. Ouvre-le et entre dans le sous-dossier si besoin.",
+  "<b>Je ne vois pas l'icône :</b> clique sur le puzzle 🧩 en haut à droite de Chrome, puis sur l'épingle à côté de « ICAM PITCH Sync ».",
+  "<b>Le menu dit « L'extension n'est pas active sur cet onglet » :</b> fais F5 sur la page PITCH, puis rouvre le menu.",
+  "<b>Je ne vois pas le bouton rouge sur PITCH :</b> vérifie que l'extension est activée dans <code>chrome://extensions</code>, que tu es bien sur <code>https://pitch-icam.rima1.fr</code>, puis fais F5.",
+  "<b>« Aucun RA trouvé » :</b> F5, clique sur une compétence (ex. C01), attends que ses RA s'affichent, puis relance. Le message donne un rapport : envoie-le si ça persiste.",
+  "<b>Des blocs affichent « HTTP 401/403 » :</b> ta session PITCH a expiré. Reconnecte-toi à PITCH, F5, relance.",
+  "<b>Le portail dit « Aucune donnée serveur pour… » :</b> l'email saisi dans l'extension n'est pas le même que celui du portail. Corrige-le dans le menu de l'extension et relance.",
+  "<b>« Le portail n'a pas répondu » :</b> le site (PythonAnywhere) est arrêté ou en erreur. Ouvre-le dans un onglet pour vérifier, puis réessaie.",
   "<b>Chrome affiche « Désactiver les extensions en mode développeur »</b> au démarrage : normal pour une extension qui ne vient pas du Chrome Web Store. Ferme le message sans désactiver.",
-  "<b>Il me manque des RA (C03, C04, C10, C11, C13…)</b> : installe l'extension <b>2.1</b> (cette version envoie aussi les RA pas encore évalués), puis relance la synchro. Regarde la ligne « Blocs lus » dans le message final : <code>C04: 0</code> signifie que PITCH lui-même ne renvoie aucun RA pour cette compétence.",
-  "<b>Mise à jour de l'extension</b> : remplace les fichiers dans ton dossier, puis clique sur l'icône ↻ de la carte de l'extension dans <code>chrome://extensions</code>.",
-  "<b>Mes curseurs ont changé</b> : les scores PITCH écrasent tes réglages manuels à chaque synchro. Pour les RA que PITCH n'évalue pas encore, tes valeurs manuelles sont conservées."
+  "<b>La recherche ne trouve pas les titres des RA :</b> les titres arrivent avec la synchro. Relance-la avec la v3 puis clique sur « Rafraîchir mes scores ». Tu peux toujours chercher par code (RA-MIA-C01-2) ou par nom de compétence.",
+  "<b>Mise à jour de l'extension :</b> remplace les fichiers dans ton dossier, puis clique sur l'icône ↻ de la carte de l'extension dans <code>chrome://extensions</code>.",
+  "<b>Mes scores ont changé :</b> les scores viennent uniquement de PITCH et sont écrasés à chaque synchro. Un RA non évalué ne remplace jamais un score déjà reçu."
 ];
 
 const AGENDA_LINK = [
@@ -480,6 +495,88 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+
+/* ---- Recherche de compétences et de RA ---- */
+const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[’']/g, ' ');
+
+function buildIndex() {
+  const idx = [];
+  Object.keys(COMPETENCES_DB).forEach(k => {
+    const c = COMPETENCES_DB[k];
+    idx.push({ kind: 'comp', key: k, label: c.title, sub: c.desc, hay: norm(k + ' ' + c.title + ' ' + c.desc) });
+    getRAs(k).forEach(ra => {
+      const t = raTitles[ra] || '';
+      idx.push({ kind: 'ra', key: k, ra, label: ra, sub: t, hay: norm(ra + ' ' + t + ' ' + c.title) });
+    });
+  });
+  return idx;
+}
+
+function runSearch() {
+  const q = $('compSearch').value.trim(), box = $('compSearchResults');
+  $('compSearchClear').classList.toggle('hidden', !q);
+  if (!q) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+  const words = norm(q).split(/\s+/).filter(Boolean);
+  const hits = buildIndex().filter(x => words.every(w => x.hay.includes(w)));
+  hits.sort((a, b) => (a.kind === 'comp' ? 0 : 1) - (b.kind === 'comp' ? 0 : 1));
+  box.classList.remove('hidden');
+  if (!hits.length) {
+    box.innerHTML = `<div class="p-4 text-xs text-slate-500">Aucun résultat pour « ${esc(q)} ».<br>Si tu cherches le titre d'un RA, lance d'abord la synchro PITCH avec l'extension v3 : les titres sont récupérés en même temps que tes scores.</div>`;
+    return;
+  }
+  // Surligne les mots trouvés, accents et majuscules ignorés (on repère les positions sur le texte normalisé,
+  // puis on reconstruit à partir du texte d'origine pour ne jamais casser le HTML)
+  const mark = t => {
+    t = String(t || '');
+    let n = '', map = [];
+    Array.from(t).forEach((ch, i) => { const c = norm(ch); for (let k = 0; k < c.length; k++) { n += c[k]; map.push(i); } });
+    const chars = Array.from(t), on = new Array(chars.length).fill(false);
+    words.forEach(w => { let p = n.indexOf(w); while (p !== -1) { for (let k = p; k < p + w.length; k++) on[map[k]] = true; p = n.indexOf(w, p + 1); } });
+    let out = '', open = false;
+    chars.forEach((ch, i) => {
+      if (on[i] && !open) { out += '<mark class="bg-yellow-200 rounded px-0.5">'; open = true; }
+      if (!on[i] && open) { out += '</mark>'; open = false; }
+      out += esc(ch);
+    });
+    return out + (open ? '</mark>' : '');
+  };
+  box.innerHTML = hits.slice(0, 40).map((h, i) => {
+    if (h.kind === 'comp') {
+      const st = compStats(h.key), p = st.avg === null ? '—' : fmt(st.avg) + '%';
+      return `<button type="button" data-i="${i}" onclick="pickResult('${h.key}')" class="sr w-full text-left p-3 hover:bg-red-50 flex items-start justify-between gap-3">
+        <span><span class="text-[10px] font-bold uppercase text-icam-red">Compétence</span><br><span class="text-sm font-bold">${mark(h.label)}</span><br><span class="text-[11px] text-slate-500">${mark(h.sub)}</span></span>
+        <span class="text-sm font-black shrink-0">${p}</span></button>`;
+    }
+    const ev = isEvaluated(h.ra), p = ev ? fmt(userScores[h.ra]) + '%' : 'non évalué';
+    return `<button type="button" data-i="${i}" onclick="pickResult('${h.key}','${esc(h.ra)}')" class="sr w-full text-left p-3 hover:bg-red-50 flex items-start justify-between gap-3">
+      <span><span class="text-[10px] font-bold uppercase text-slate-400">Sous-compétence (RA) · ${h.key}</span><br><span class="font-mono text-xs font-bold">${mark(h.label)}</span>${h.sub ? `<br><span class="text-[12px] text-slate-600">${mark(h.sub)}</span>` : ''}</span>
+      <span class="text-xs font-bold shrink-0 ${ev ? '' : 'text-slate-400 font-normal'}">${p}</span></button>`;
+  }).join('') + (hits.length > 40 ? `<div class="p-2 text-center text-[11px] text-slate-400">${hits.length - 40} autres résultats : précise ta recherche.</div>` : '');
+}
+
+function pickResult(key, ra) {
+  $('compSearchResults').classList.add('hidden');
+  $('competenceSelect').value = key;
+  renderCompetenceDetails();
+  const el = ra ? $('ra_' + ra) : null;
+  (el || $('compTitle')).scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (el) { el.classList.add('ring-2', 'ring-yellow-400', 'bg-yellow-50'); setTimeout(() => el.classList.remove('ring-2', 'ring-yellow-400', 'bg-yellow-50'), 2500); }
+}
+function clearSearch() { $('compSearch').value = ''; runSearch(); $('compSearch').focus(); }
+function searchKey(e) {
+  if (e.key === 'Escape') { clearSearch(); return; }
+  if (e.key === 'Enter') { e.preventDefault(); const f = document.querySelector('#compSearchResults .sr'); if (f) f.click(); }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) {
+    e.preventDefault(); switchTab('Referentiel'); $('compSearch').focus();
+  }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#compSearch') && !e.target.closest('#compSearchResults')) $('compSearchResults').classList.add('hidden');
+});
+document.addEventListener('focusin', e => { if (e.target.id === 'compSearch' && e.target.value.trim()) runSearch(); });
+
 function daysLabel(d) {
   const t = new Date(); t.setHours(0, 0, 0, 0);
   const n = Math.round((new Date(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8)) - t) / 86400000);
@@ -556,6 +653,7 @@ async function loadUserData() {
 async function refreshFromServer(silent) {
   if (!currentUser) return;
   try {
+    try { const tr = await fetch('/api/ra-titles'); if (tr.ok) raTitles = await tr.json(); } catch (e) {}
     const res = await fetch('/api/students');
     const db = await res.json();
     const me = db[currentUser.email];
@@ -565,7 +663,7 @@ async function refreshFromServer(silent) {
       $('syncDebug').textContent = JSON.stringify(me.scores || {}, null, 2);
       $('syncStatus').textContent = 'Dernière lecture serveur : ' + new Date().toLocaleTimeString() +
         ' — ' + Object.keys(me.scores || {}).length + ' RA reçus (' + Object.values(me.scores || {}).filter(v => Number(v) >= 0).length + ' évalués).' +
-        (me.updatedAt ? ' Dernière mise à jour des données : ' + new Date(me.updatedAt).toLocaleString('fr-FR') + '.' : '');
+        ((me.syncedAt || me.updatedAt) ? ' Dernière synchro PITCH : ' + new Date(me.syncedAt || me.updatedAt).toLocaleString('fr-FR') + '.' : '');
     } else {
       $('syncStatus').textContent = 'Aucune donnée serveur pour ' + currentUser.email +
         ". Vérifie que l'email saisi dans l'extension est exactement le même.";
@@ -578,6 +676,7 @@ async function refreshFromServer(silent) {
   renderCompetenceDetails();
   updateGlobalStats();
   renderEventsList();
+  if ($('compSearch').value.trim()) runSearch();
   if (!silent) alert('Scores rafraîchis : ' + Object.keys(userScores).filter(isEvaluated).length + ' RA évalués, ' + Object.keys(userScores).length + ' RA connus.');
 }
 
@@ -602,12 +701,13 @@ function renderCompetenceDetails() {
   $('compDescription').textContent = comp.desc;
   const box = $('raListContainer');
   const ras = getRAs(key);
-  box.innerHTML = ras.length ? '' : '<p class="text-xs text-slate-400 italic">Aucun RA connu pour cette compétence. Relance la synchro PITCH (extension 2.1) : ses RA seront ajoutés automatiquement.</p>';
+  box.innerHTML = ras.length ? '' : '<p class="text-xs text-slate-400 italic">Aucun RA connu pour cette compétence. Lance la synchro PITCH (extension v3) : ses RA seront ajoutés automatiquement.</p>';
   ras.forEach(ra => {
     const ev = isEvaluated(ra), score = ev ? Number(userScores[ra]) : 0;
     const d = document.createElement('div');
-    d.className = 'bg-white p-2.5 rounded-lg border flex items-center justify-between';
-    d.innerHTML = `<span class="font-mono text-xs font-bold">${esc(ra)}</span>
+    d.className = 'bg-white p-2.5 rounded-lg border flex items-center justify-between gap-3';
+    d.id = 'ra_' + ra;
+    d.innerHTML = `<div class="min-w-0"><span class="font-mono text-xs font-bold">${esc(ra)}</span>${raTitles[ra] ? `<div class="text-[11px] text-slate-500 leading-snug">${esc(raTitles[ra])}</div>` : ''}</div>
       <div class="flex items-center gap-3">
         <div class="w-28 h-2.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full rounded-full ${barColor(ev ? score : null)}" style="width:${score}%"></div></div>
         <span class="text-xs font-bold w-16 text-right ${ev ? '' : 'text-slate-400 font-normal'}" id="val_${esc(ra)}">${ev ? fmt(score) + '%' : 'non évalué'}</span>
@@ -779,8 +879,9 @@ function proposeStudentEvaluation(e) {
         $('propEvalTitle').value = ''; $('propEvalDate').value = '';
         selectedPropRAs.clear(); renderPropRACheckboxes(); renderBadges(); loadCustomEvaluations();
         alert("Proposition envoyée, en attente de validation d'un admin.");
-      } else alert('Erreur : ' + d.message + (converted ? "\n\nTon lien a été converti automatiquement. Il ne fonctionne que si l'agenda est PUBLIC (Google Agenda > Paramètres de l'agenda > Autorisations d'accès > « Rendre disponible publiquement »). Sinon utilise l'adresse secrète au format iCal." : ''));
-    });
+      } else alert('Erreur : ' + d.message);
+    })
+    .catch(e => alert('Serveur injoignable : ' + e.message));
 }
 
 function adminAction(url, body) {
@@ -830,7 +931,7 @@ function importIcalUrl() {
       if (d.status === 'success') {
         parseIcs(d.content);
         if (currentUser) localStorage.setItem('icam_ical_' + currentUser.email, url);
-      } else alert('Erreur : ' + d.message);
+      } else alert('Erreur : ' + d.message + (converted ? "\n\nTon lien a été converti automatiquement. Il ne fonctionne que si l'agenda est PUBLIC (Google Agenda > Paramètres de l'agenda > Autorisations d'accès > « Rendre disponible publiquement »). Sinon utilise l'adresse secrète au format iCal." : ''));
     })
     .catch(e => alert('Serveur injoignable : ' + e.message));
 }
